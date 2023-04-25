@@ -155,10 +155,14 @@ def home():
         if(temp_group.quest != ""):
             quest_check = 1
         if request.method == "POST":
-            if(quest_check):
-                return redirect(url_for('upload', group = temp_group.id))
+            if request.form['submit_button'] == 'Log-out':
+                session.clear()
+                return redirect(url_for('login')) 
             else:
-                return redirect(url_for('create'))
+                if(quest_check):
+                    return redirect(url_for('upload', group = temp_group.id))
+                else:
+                    return redirect(url_for('create'))
     else: return redirect(url_for('login'))         
     return render_template('index.html', quest_check = quest_check, user = session["user"], groups=groups, friends=friends)
 
@@ -170,28 +174,36 @@ def create():
     #create the quest
     form = QuestForm()
     if request.method == "POST":
-        quest = form.quest.data # First grab the file
-        rules = form.rules.data
-        temp_group.add_quest(quest, rules)
-        return redirect(url_for('upload', group = temp_group.id))
+        if request.form['submit_button'] == 'Log-out':
+                session.clear()
+                return redirect(url_for('login')) 
+        else:
+            quest = form.quest.data # First grab the file
+            rules = form.rules.data
+            temp_group.add_quest(quest, rules)
+            return redirect(url_for('upload', group = temp_group.id))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
 @app.route('/upload/<group>', methods=["GET", "POST"])
 def upload(group):
-    file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
-    quest_msg = temp_group.quest
-    rules_msg = temp_group.rules
-    form = UploadFileForm()
-    if form.validate_on_submit():
-        file = form.file.data # First grab the file
-        #save the file to (file location of root + file in root + file name)
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(file_num) + file.filename))) # Then save the file
-        #update the fake databse
-        sub =Submission(session["user"], file.filename)
-        temp_submissions.append(sub)
-        return redirect(url_for('watch', curr = 0))
+    if request.method == "POST" and request.form['submit_button'] == 'Log-out':
+            session.clear()
+            return redirect(url_for('login')) 
+    else:
+        file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
+        quest_msg = temp_group.quest
+        rules_msg = temp_group.rules
+        form = UploadFileForm()
+        if form.validate_on_submit():
+            file = form.file.data # First grab the file
+            #save the file to (file location of root + file in root + file name)
+            file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(file_num) + file.filename))) # Then save the file
+            #update the fake databse
+            sub =Submission(session["user"], file.filename)
+            temp_submissions.append(sub)
+            return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
@@ -221,7 +233,10 @@ def watch(curr):
             temp_submissions[curr].upvote()
             print("Current vote counter:")
             print(temp_submissions[curr].votes)
-            return redirect(url_for('results'))        
+            return redirect(url_for('results'))
+        if(button == "Log-out"):
+            session.clear()
+            return redirect(url_for('login')) 
         #load next media file
         return redirect(url_for('watch', curr=curr))
     # Load the webpage

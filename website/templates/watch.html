@@ -31,16 +31,16 @@
                 <h3>Load Another Submission</h3>
                     <form method="post" action="#">
                         {%if curr != 0:%}
-                            <button type="submit" name="submit_button" value="PREV">PREV</button>
+                            <input type="submit" name="submit_button" value="PREV">
                         {% endif %}
                         {%if curr != files:%} 
-                            <button type="submit" name="submit_button" value="NEXT">NEXT</button>
+                            <input type="submit" name="submit_button" value="NEXT">
                         {% endif %}
                         <h4> Upload Another Submission:
-                            <button type="submit" name="submit_button" value="NEW">UPLOAD</button>        
+                            <input type="submit" name="submit_button" value="NEW">      
                         <h4>
                         <h5> UPVOTE:
-                            <button type="submit" name="submit_button" value="UP">UPVOTE</button>        
+                            <input type="submit" name="submit_button" value="UP">       
                         <h5>
                     </form>
         </div>
