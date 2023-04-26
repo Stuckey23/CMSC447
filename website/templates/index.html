@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" href='/static/home.css' />
+    
     <title>Home</title>
 </head>
 
 
 <body>
     <div class="container" style="display: flex;">
-        <div style="width: 35%;">
+        <div style="width: 35%; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column left">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1;">
+        <div style="flex-grow: 1; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column right">
             <h1 style="text-align:center">
                 Welcome to Quests:
                 <div>{{user}}</div>
@@ -26,7 +28,7 @@
                     <h2 style="text-align:center">A quest has been already created!:</h2>
                     <h3 style="text-align:center">
                     <form action="#" method="post">
-                    <button type="submit">veiw</button>
+                    <button type="submit">view</button>
                     </form>    
                     </h3>
                 {%endif%}
