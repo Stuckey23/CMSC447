@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" href='/static/home.css' />
+    
     <title>Home</title>
 </head>
 <body>
     <div class="container" style="display: flex;">
-        <div style="width: 35%;">
+        <div style="width: 35%; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column left">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1;">
+        <div style="flex-grow: 1; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column left">
             <h2 style="text-align:center">QUEST:</h2>
             <p rows = 10, cols = 50 style="text-align:center">{{quest}}</p>
             <h2 style="text-align:center">Rules: </h2>
