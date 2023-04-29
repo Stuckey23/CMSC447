@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <head>
     <link rel="stylesheet" href='/static/home.css' />
-    
+
     <title>Home</title>
 </head>
-
-
 <body>
+    <!--Top bar, includes home, search buttons-->
+    <div class="container spacing" style="display: flex;">
+        <button type="button"><img src="/static/icons/home.png"></button>
+    </div>
     <div class="container" style="display: flex;">
-        <div style="width: 35%; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column left">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column opacity;">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column right">
+        <div style="flex-grow: 1;" class="column;">
             <h1 style="text-align:center">
                 Welcome to Quests:
                 <div>{{user}}</div>
