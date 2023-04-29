@@ -34,6 +34,17 @@ friends = [
     {"name": "ToothStealer", "isFriend": False}
 ]
 
+        # ADD FRIENDS
+        # userA = session.get("user")
+        #result = chkd_db.addFriend(userA, userB)
+        #if result == 0:
+        #   flash("You already are friends with this user.")
+        #elif result == 1:
+        #   do something to update screen to reflect changes (add them to the list)
+        #   flash("You are now friends with this user.")
+        #else:
+        #   flash("Something went wrong.")
+
 #root of the website folder
 root_path = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
@@ -170,9 +181,20 @@ def create():
     #create the quest
     form = QuestForm()
     if request.method == "POST":
+        # Kyle
         quest = form.quest.data # First grab the file
         rules = form.rules.data
         temp_group.add_quest(quest, rules)
+
+        # Get the USER ID and GROUP ID
+
+        # Get the input from user
+        title = str(form.quest.data)
+        description = str(form.rules.data)
+    
+        # Call to Database
+        #chkd_db.newChallenge(user, title, description, group)
+        
         return redirect(url_for('upload', group = temp_group.id))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
@@ -188,9 +210,19 @@ def upload(group):
         file = form.file.data # First grab the file
         #save the file to (file location of root + file in root + file name)
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(file_num) + file.filename))) # Then save the file
+       
         #update the fake databse
         sub =Submission(session["user"], file.filename)
         temp_submissions.append(sub)
+
+        # Update the Database
+        file = form.file.data # First grab the file
+        user = session["user"]
+        challenge_id = 1
+
+        # Call to Database
+        chkd_db.newPost(user, file, challenge_id)
+
         return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
@@ -229,7 +261,7 @@ def watch(curr):
             return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
     
 
- #/results, webpage to veiw the top upvoted
+ #/results, webpage to viww the top upvoted
  #this is not fully coded yet
 @app.route('/results', methods=['GET', 'POST'])
 def results():
