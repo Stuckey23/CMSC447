@@ -80,19 +80,11 @@ class Submission():
 
     
 # def getGroups():
-#     groups = [
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-#     ]
+#   
 #     return groups
 
 # def getFriends():
-#     friends = [
-#         {"name": "ThwompFriend12", "isFriend": True},
-#         {"name": "ToothStealer", "isFriend": False}
-#     ]
+#     
 #     return friends
 
 #mediaType(), given an image name checks what type of media was uploaded
