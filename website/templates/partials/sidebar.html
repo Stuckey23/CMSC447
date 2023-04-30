@@ -16,9 +16,9 @@
             Groups
         </div>
         <div style="flex-grow: 1;">
-            <button type="button">
-                New Group
-            </button>
+            <form action="#" method="post">
+                <input type="submit" name="new_button" value="New Grouo">
+            </form> 
         </div>
 
     </div>
@@ -56,9 +56,9 @@
             Friends
         </div>
         <div style="flex-grow: 1;">
-            <button type="button">
-                Add Friend
-            </button>
+            <form action="#" method="post">
+                <input type="submit" name="add_button" value="Add Friend">
+            </form> 
         </div>
 
     </div>
@@ -74,17 +74,15 @@
                     <!-- Checks friend status to decide which to show -->
                     {% if friend.isFriend %}
                         <!-- Replace buttons with hamburger menu? -->
-                        <button type="button">
-                            Remove friend
-                        </button>
+                        <form action="#" method="post">
+                            <input type="submit" name="remove_button_{{friend.name}}" value="Remove Friend">
+                        </form> 
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
-                        <button type="button">
-                            Accept
-                        </button>
-                        <button type="button">
-                            Decline
-                        </button>
+                    <form action="#" method="post">
+                        <input type="submit" name="accept_button_{{friend.name}}" value="Accept">
+                        <input type="submit" name="decline_button_{{friend.name}}" value="Decline">
+                    </form> 
                     {%endif%}
                 </div>
             </div>
@@ -99,10 +97,8 @@
         <div style="flex-grow: 1;">
             <form action="#" method="post">
                 <input type="submit" name="submit_button" value="Log-out">
-                </form> 
-            
+            </form> 
         </div>
-
     </div>
 </body>
 </html>
