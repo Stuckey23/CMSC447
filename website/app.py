@@ -112,7 +112,6 @@ temp_group = Groups("none", 0)#temp group fo testing
 #login page
 @app.route('/login', methods=['GET',"POST"])
 def login():
-
     form = LoginForm()
     if request.method == "POST":
         # Get the input from user
@@ -138,24 +137,69 @@ def login():
     # Close out of DB after using DB / webapp
     return(render_template('login.html', form = form))
     
+def acceptFriendRequest(friendName):
+    print("accepted!" + friendName)
+    pass
+
+def declineFriendRequest(friendName):
+    print("declined!" + friendName)
+    pass
+
+def addFriend():
+    pass
+
+def removeFriend():
+    pass
+
+def acceptGroup():
+    pass
+
+def declineGroup():
+    pass
+
+def newGroup():
+    pass
+
+def logOut(arg):
+    session.clear()
+    return redirect(url_for('login')) 
+
+
+def handleSidebar(request):
+    functions = {"accept": acceptFriendRequest, "decline": declineFriendRequest, "log-out": logOut}
+    if request.method == "POST":
+        formType = request.form.get('formType')
+        if formType == "sidebar":
+            return functions[request.form.get('button')](request.form.get('friend'))
+
+def validateUser():
+    if "user" in session:
+        return None
+    else: return redirect(url_for('login'))         
+
+
 #home page
 @app.route('/home', methods=['GET',"POST"])
 def home():
     #check that the user actually sigined in and didn't manually type the url
-    if "user" in session:
-        quest_check = 0 #checks if a quest has been made yet
-        if(temp_group.quest != ""):
-            quest_check = 1
-        if request.method == "POST":
-            if request.form['submit_button'] == 'Log-out':
-                session.clear()
-                return redirect(url_for('login')) 
-            else:
-                if(quest_check):
-                    return redirect(url_for('upload', group = temp_group.id))
-                else:
-                    return redirect(url_for('create'))
-    else: return redirect(url_for('login'))         
+    results = validateUser()
+    if results != None:
+        return results
+    
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    quest_check = 0 #checks if a quest has been made yet
+    if(temp_group.quest != ""):
+        quest_check = 1
+    
+    # if request.method == "POST":
+    #     if(quest_check):
+    #         return redirect(url_for('upload', group = temp_group.id))
+    #     else:
+    #         return redirect(url_for('create'))
+    
     return render_template('index.html', quest_check = quest_check, user = session["user"], groups=groups, friends=friends)
 
 

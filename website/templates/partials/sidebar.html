@@ -17,7 +17,7 @@
         </div>
         <div style="flex-grow: 1;">
             <form action="#" method="post">
-                <input type="submit" name="new_button" value="New Grouo">
+                <input type="submit" name="new_button" value="New Group">
             </form> 
         </div>
 
@@ -80,8 +80,10 @@
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
                     <form action="#" method="post">
-                        <input type="submit" name="accept_button_{{friend.name}}" value="Accept">
-                        <input type="submit" name="decline_button_{{friend.name}}" value="Decline">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="friend" value="{{friend.name}}">
+                        <button type="submit" name="button" value="accept">Accept</button>
+                        <button type="submit" name="button" value="decline">Decline</button>
                     </form> 
                     {%endif%}
                 </div>
@@ -96,7 +98,8 @@
     <div class="container" style="display: flex;">
         <div style="flex-grow: 1;">
             <form action="#" method="post">
-                <input type="submit" name="submit_button" value="Log-out">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="log-out">Log out</button>
             </form> 
         </div>
     </div>
