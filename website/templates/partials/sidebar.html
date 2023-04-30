@@ -17,7 +17,8 @@
         </div>
         <div style="flex-grow: 1;">
             <form action="#" method="post">
-                <input type="submit" name="new_button" value="New Group">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="newGroup">New Group</button>
             </form> 
         </div>
 
@@ -57,7 +58,8 @@
         </div>
         <div style="flex-grow: 1;">
             <form action="#" method="post">
-                <input type="submit" name="add_button" value="Add Friend">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="requestFriend">Add Friend</button>
             </form> 
         </div>
 
@@ -75,15 +77,17 @@
                     {% if friend.isFriend %}
                         <!-- Replace buttons with hamburger menu? -->
                         <form action="#" method="post">
-                            <input type="submit" name="remove_button_{{friend.name}}" value="Remove Friend">
+                            <input type="hidden" name="formType" value="sidebar">
+                            <input type="hidden" name="value" value="{{friend.name}}">
+                            <button type="submit" name="button" value="removeFriend">Remove Friend</button>
                         </form> 
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
-                        <input type="hidden" name="friend" value="{{friend.name}}">
-                        <button type="submit" name="button" value="accept">Accept</button>
-                        <button type="submit" name="button" value="decline">Decline</button>
+                        <input type="hidden" name="value" value="{{friend.name}}">
+                        <button type="submit" name="button" value="acceptFriend">Accept</button>
+                        <button type="submit" name="button" value="declineFriend">Decline</button>
                     </form> 
                     {%endif%}
                 </div>

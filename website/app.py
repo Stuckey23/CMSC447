@@ -1,5 +1,5 @@
 # Database Libraries
-import chkd_db
+import chkd_db as database
 import sqlalchemy
 
 from flask import Flask, render_template, redirect, url_for, request, session, flash
@@ -119,7 +119,7 @@ def login():
         password = str(form.password.data)
 
         # Call to Database
-        user_id = chkd_db.login(username, password)
+        user_id = database.login(username, password)
 
         # User login failed
         if(user_id == -1):
@@ -136,41 +136,75 @@ def login():
         
     # Close out of DB after using DB / webapp
     return(render_template('login.html', form = form))
-    
-def acceptFriendRequest(friendName):
-    print("accepted!" + friendName)
-    pass
-
-def declineFriendRequest(friendName):
-    print("declined!" + friendName)
-    pass
-
-def addFriend():
-    pass
-
-def removeFriend():
-    pass
-
-def acceptGroup():
-    pass
-
-def declineGroup():
-    pass
-
-def newGroup():
-    pass
-
-def logOut(arg):
-    session.clear()
-    return redirect(url_for('login')) 
-
 
 def handleSidebar(request):
-    functions = {"accept": acceptFriendRequest, "decline": declineFriendRequest, "log-out": logOut}
+    functions = {
+        "acceptFriend": acceptFriendRequest, 
+        "declineFriend": declineFriendRequest, 
+        "requestFriend": requestFriend,
+        "removeFriend": removeFriend,
+        "acceptGroup": acceptGroup,
+        "declineGroup": declineGroup,
+        "newGroup": newGroup,
+        "log-out": logOut
+        }
+    
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "sidebar":
-            return functions[request.form.get('button')](request.form.get('friend'))
+            return functions[request.form.get('button')](request.form.get('value'))
+    
+def acceptFriendRequest(arg):
+    friendName = arg
+    username = session["user"]
+    print("%s accepted %s's friend request" % (username, friendName))
+    #database.addFriend(friendName, username)
+    return
+
+def declineFriendRequest(arg):
+    friendName = arg
+    username = session["user"]
+    print("%s declined %s's friend request" % (username, friendName))
+    return
+
+def requestFriend(arg):
+    requesteeName = arg
+    requesterName = session["user"]
+    print("%s sent a friend requet to %s" % (requesterName, requesteeName))
+    #database.requestFriend(requesteeName, requesterName)
+    return
+
+def removeFriend(arg):
+    userA = session["user"]
+    userB = arg
+    print("%s removed %s as a friend" % (userA, userB))
+    #database.removeFriend(userA, userB)
+    return
+
+def acceptGroup(arg):
+    username = session["user"]
+    groupName = arg
+    print("%s joined the group: %s" % (username, groupName))
+    #database.addUserToGroup(username, groupName)
+    return
+
+def declineGroup(arg):
+    return
+
+def newGroup(arg):
+    groupName = arg
+    username = session["user"]
+    print("%s created group: %s" % (username, groupName))
+    #database.newGroup(groupName, username)
+    return
+
+def logOut(arg):
+    session.clear()
+    print("User logged out")
+    return redirect(url_for('login')) 
+
+
+
 
 def validateUser():
     if "user" in session:
@@ -186,6 +220,7 @@ def home():
     if results != None:
         return results
     
+    # Sees if anything was pressed in sidebar, handles it
     results = handleSidebar(request)
     if results != None:
         return results
@@ -194,11 +229,12 @@ def home():
     if(temp_group.quest != ""):
         quest_check = 1
     
-    # if request.method == "POST":
-    #     if(quest_check):
-    #         return redirect(url_for('upload', group = temp_group.id))
-    #     else:
-    #         return redirect(url_for('create'))
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        if(quest_check):
+            return redirect(url_for('upload', group = temp_group.id))
+        else:
+            return redirect(url_for('create'))
     
     return render_template('index.html', quest_check = quest_check, user = session["user"], groups=groups, friends=friends)
 
@@ -207,31 +243,46 @@ def home():
 #returns the upload page after any text is sumbitted
 @app.route('/create', methods=['GET', 'Post'])
 def create():
-    #create the quest
     form = QuestForm()
-    if request.method == "POST":
-        if request.form['submit_button'] == 'Log-out':
-                session.clear()
-                return redirect(url_for('login')) 
-        else:
-            quest = form.quest.data # First grab the file
-            rules = form.rules.data
-            temp_group.add_quest(quest, rules)
-            return redirect(url_for('upload', group = temp_group.id))
+
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        quest = form.quest.data # First grab the file
+        rules = form.rules.data
+        temp_group.add_quest(quest, rules)
+        return redirect(url_for('upload', group = temp_group.id))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
 @app.route('/upload/<group>', methods=["GET", "POST"])
 def upload(group):
-    if request.method == "POST" and request.form['submit_button'] == 'Log-out':
-            session.clear()
-            return redirect(url_for('login')) 
-    else:
-        file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
-        quest_msg = temp_group.quest
-        rules_msg = temp_group.rules
-        form = UploadFileForm()
+    form = UploadFileForm()
+    file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
+    quest_msg = temp_group.quest
+    rules_msg = temp_group.rules
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
         if form.validate_on_submit():
             file = form.file.data # First grab the file
             #save the file to (file location of root + file in root + file name)
@@ -251,7 +302,18 @@ def watch(curr):
     folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) -1
     img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[curr]
     #check what button is pressed
-    if request.method == "POST":
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
         button = request.form["submit_button"]
         if(button == "NEXT"):
             if curr == folder_len:
@@ -315,4 +377,4 @@ if __name__ == '__main__':
     app.run(debug=True, host = "0.0.0.0", port = 25565)
     '''
     app.run(debug=True)
-    #chkd_db.finished()
+    #database.finished()
