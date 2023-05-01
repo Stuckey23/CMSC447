@@ -81,17 +81,17 @@ friends = [
     {"name": "ToothStealer", "isFriend": False}
 ]
 
-submissions = [
-    {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
-    {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
-]
+# submissions = [
+#     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
+#     {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
+# ]
 
-# submissions = []
+submissions = []
 
 
 tasks = [
-    {"title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
-    {"title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
+    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
+    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
 ]
 
 #tasks = []
@@ -153,7 +153,8 @@ def login():
 def handleHome(request):
     functions = {
         "newSubmission": newSubmission,
-        "viewSubmission": viewSubmission
+        "viewSubmission": viewSubmission,
+        "newQuest": createQuest
     }
 
     if request.method == "POST":
@@ -166,6 +167,10 @@ def newSubmission(arg):
 
 def viewSubmission(arg):
     return redirect(url_for('watch', curr = 0))
+
+def createQuest(arg):
+    return redirect(url_for('create'))
+    
 
 def handleSidebar(request):
     functions = {
@@ -261,15 +266,8 @@ def home():
     
     questExists = len(tasks)
     
-    formType = request.form.get('formType')
-    if request.method == "POST" and (formType != "sidebar" and formType != "home"):
-        if questExists:
-            return redirect(url_for('upload', group = temp_group.id))
-        else:
-            return redirect(url_for('create'))
-    
 
-    return render_template('index.html', questExists = questExists, user = session["user"], groups=groups, friends=friends, tasks=tasks)
+    return render_template('index.html', questExists = questExists, user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=tasks)
 
 
 #/create, collects text information to create a task
@@ -292,8 +290,8 @@ def create():
     if request.method == "POST" and formType != "sidebar":
         quest = form.quest.data # First grab the file
         rules = form.rules.data
-        temp_group.add_quest(quest, rules)
-        return redirect(url_for('upload', group = temp_group.id))
+        tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
+        return redirect(url_for('upload', group = len(tasks) - 1))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
@@ -302,8 +300,9 @@ def create():
 def upload(group):
     form = UploadFileForm()
     file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
-    quest_msg = temp_group.quest
-    rules_msg = temp_group.rules
+    
+    quest_msg = tasks[int(group)].get("title")
+    rules_msg = tasks[int(group)].get("rules")
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
     if results != None:
