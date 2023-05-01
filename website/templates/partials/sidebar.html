@@ -16,9 +16,10 @@
             <b style="font-size: 24px;">Groups</b>
         </div>
         <div style="flex-grow: 1;">
-            <button type="button" style="float: right;">
-                New Group
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="newGroup">New Group</button>
+            </form> 
         </div>
 
     </div>
@@ -56,9 +57,10 @@
             <b style="font-size: 24px;">Friends</b>
         </div>
         <div style="flex-grow: 1;">
-            <button type="button" style="float: right;">
-                Add Friend
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="requestFriend">Add Friend</button>
+            </form> 
         </div>
 
     </div>
@@ -74,17 +76,19 @@
                     <!-- Checks friend status to decide which to show -->
                     {% if friend.isFriend %}
                         <!-- Replace buttons with hamburger menu? -->
-                        <button type="button" style="float: right;">
-                            Remove friend
-                        </button>
+                        <form action="#" method="post">
+                            <input type="hidden" name="formType" value="sidebar">
+                            <input type="hidden" name="value" value="{{friend.name}}">
+                            <button type="submit" name="button" value="removeFriend">Remove Friend</button>
+                        </form> 
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
-                        <button type="button">
-                            Accept
-                        </button>
-                        <button type="button">
-                            Decline
-                        </button>
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{friend.name}}">
+                        <button type="submit" name="button" value="acceptFriend">Accept</button>
+                        <button type="submit" name="button" value="declineFriend">Decline</button>
+                    </form> 
                     {%endif%}
                 </div>
             </div>
@@ -97,14 +101,11 @@
     <!-- Footer -->
     <div class="container" style="display: flex;">
         <div style="flex-grow: 1;">
-            <button type="button">
-                Settings
-            </button>
-            <button type="button" style="float: right;">
-                Log-out
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="log-out">Log out</button>
+            </form> 
         </div>
-
     </div>
 </body>
 </html>

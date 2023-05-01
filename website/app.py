@@ -1,5 +1,5 @@
 # Database Libraries
-import chkd_db
+import chkd_db as database
 import sqlalchemy
 
 from flask import Flask, render_template, redirect, url_for, request, session, flash
@@ -21,18 +21,7 @@ video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 
-# Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
 
-friends = [
-    {"name": "ThwompFriend12", "isFriend": True},
-    {"name": "ToothStealer", "isFriend": False}
-]
 
 #root of the website folder
 root_path = os.path.dirname(os.path.abspath(__file__))
@@ -91,14 +80,35 @@ class Submission():
     def commnet(self, input):
         self.comments.append(input)
     
-# def getGroups():
-#     groups = [
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-#     ]
-#     return groups
+# Hard coded groups and friends. This eventually needs to come from the database
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
+]
+
+friends = [
+    {"name": "ThwompFriend12", "isFriend": True},
+    {"name": "ToothStealer", "isFriend": False}
+]
+
+# submissions = [
+#     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
+#     {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
+# ]
+
+submissions = []
+
+
+tasks = [
+    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
+    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
+]
+
+#tasks = []
+
+
 
 # def getFriends():
 #     friends = [
@@ -108,21 +118,41 @@ class Submission():
 #     return friends
 
     
-# def getGroups():
-#     groups = [
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-#     ]
-#     return groups
+# Hard coded groups and friends. This eventually needs to come from the database
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
+]
 
-# def getFriends():
-#     friends = [
-#         {"name": "ThwompFriend12", "isFriend": True},
-#         {"name": "ToothStealer", "isFriend": False}
-#     ]
-#     return friends
+friends = [
+    {"name": "ThwompFriend12", "isFriend": True},
+    {"name": "ToothStealer", "isFriend": False}
+]
+
+# submissions = [
+#     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
+#     {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
+# ]
+
+submissions = []
+
+
+tasks = [
+    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
+    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
+]
+
+#tasks = []
+
+
+
+#FAKE DATABSE!
+#This is here beacause I havent connected the website to the data base yet
+temp_submissions = []  #temp array to all quest submissions
+temp_group = Groups("none", 0)#temp group fo testing
+
 
 #mediaType(), given an image name checks what type of media was uploaded
 #returns an int 1-image, 2-video, 3-audio
@@ -159,7 +189,7 @@ def login():
         password = str(form.password.data)
 
         # Call to Database
-        user_id = chkd_db.login(username, password)
+        user_id = database.login(username, password)
 
         # User login failed
         if(user_id == -1):
@@ -175,49 +205,173 @@ def login():
             return redirect(url_for('home'))
         
     # Close out of DB after using DB / webapp
-    return(render_template('login.html', form = form))  
+    return(render_template('login.html', form = form))
+
+def handleHome(request):
+    functions = {
+        "newSubmission": newSubmission,
+        "viewSubmission": viewSubmission,
+        "newQuest": createQuest
+    }
+
+    if request.method == "POST":
+        formType = request.form.get('formType')
+        if formType == "home":
+            return functions[request.form.get('button')](request.form.get('value'))
+
+def newSubmission(arg):
+    return redirect(url_for('upload', group = arg))
+
+def viewSubmission(arg):
+    return redirect(url_for('watch', curr = 0))
+
+def createQuest(arg):
+    return redirect(url_for('create'))
     
+
+def handleSidebar(request):
+    functions = {
+        "acceptFriend": acceptFriendRequest, 
+        "declineFriend": declineFriendRequest, 
+        "requestFriend": requestFriend,
+        "removeFriend": removeFriend,
+        "acceptGroup": acceptGroup,
+        "declineGroup": declineGroup,
+        "newGroup": newGroup,
+        "log-out": logOut
+        }
+    
+    if request.method == "POST":
+        formType = request.form.get('formType')
+        if formType == "sidebar":
+            return functions[request.form.get('button')](request.form.get('value'))
+    
+def acceptFriendRequest(arg):
+    friendName = arg
+    username = session["user"]
+    print("%s accepted %s's friend request" % (username, friendName))
+    #database.addFriend(friendName, username)
+    return
+
+def declineFriendRequest(arg):
+    friendName = arg
+    username = session["user"]
+    print("%s declined %s's friend request" % (username, friendName))
+    return
+
+def requestFriend(arg):
+    requesteeName = arg
+    requesterName = session["user"]
+    print("%s sent a friend requet to %s" % (requesterName, requesteeName))
+    #database.requestFriend(requesteeName, requesterName)
+    return
+
+def removeFriend(arg):
+    userA = session["user"]
+    userB = arg
+    print("%s removed %s as a friend" % (userA, userB))
+    #database.removeFriend(userA, userB)
+    return
+
+def acceptGroup(arg):
+    username = session["user"]
+    groupName = arg
+    print("%s joined the group: %s" % (username, groupName))
+    #database.addUserToGroup(username, groupName)
+    return
+
+def declineGroup(arg):
+    return
+
+def newGroup(arg):
+    groupName = arg
+    username = session["user"]
+    print("%s created group: %s" % (username, groupName))
+    #database.newGroup(groupName, username)
+    return
+
+def logOut(arg):
+    session.clear()
+    print("User logged out")
+    return redirect(url_for('login')) 
+
+
+
+
+def validateUser():
+    if "user" in session:
+        return None
+    else: return redirect(url_for('login'))         
+
+
 #home page
 @app.route('/home', methods=['GET',"POST"])
 def home():
-    #check that the user actually sigined in and didn't manualy type the url
-    if "user" in session:
-        quest_check = 0 #checks if a quest has been made yet
-        if(temp_group.quest != ""):
-            quest_check = 1
-        if request.method == "POST":
-            if(quest_check):
-                return redirect(url_for('upload', group = temp_group.id))
-            else:
-                return redirect(url_for('create'))
-    else: return redirect(url_for('login'))         
-    return render_template('index.html', quest_check = quest_check, user = session["user"], groups=groups, friends=friends)
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    results = handleHome(request)
+    if results != None:
+        return results
+    
+    questExists = len(tasks)
+    
+
+    return render_template('index.html', questExists = questExists, user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=tasks)
 
 
 #/create, collects text information to create a task
 #returns the upload page after any text is sumbitted
 @app.route('/create', methods=['GET', 'Post'])
 def create():
-    #create the quest
-    if "user" in session:
-        form = QuestForm()
-        if request.method == "POST":
-            quest = form.quest.data # First grab the file
-            rules = form.rules.data
-            temp_group.add_quest(quest, rules)
-            return redirect(url_for('upload', group = temp_group.id))
-    else: return redirect(url_for('login'))    
+    form = QuestForm()
+
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        quest = form.quest.data # First grab the file
+        rules = form.rules.data
+        tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
+        return redirect(url_for('upload', group = len(tasks) - 1))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
 @app.route('/upload/<group>', methods=["GET", "POST"])
 def upload(group):
-    if "user" in session:    
-        file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
-        quest_msg = temp_group.quest
-        rules_msg = temp_group.rules
-        form = UploadFileForm()
+    form = UploadFileForm()
+    file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
+    
+    quest_msg = tasks[int(group)].get("title")
+    rules_msg = tasks[int(group)].get("rules")
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
         if form.validate_on_submit():
             file = form.file.data # First grab the file
             #save the file to (file location of root + file in root + file name)
@@ -226,7 +380,6 @@ def upload(group):
             sub =Submission(session["user"], file.filename)
             temp_submissions.append(sub)
             return redirect(url_for('watch', curr = 0))
-    else: return redirect(url_for('login'))    
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
@@ -234,40 +387,48 @@ def upload(group):
 #returns the next or previous submission, or redirects to the voting page
 @app.route('/watch/<curr>', methods=['GET', 'POST'])
 def watch(curr):
-    if "user" in session:
-        form = CommentForm()
-        curr = int(curr)
-        folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) -1
-        img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[curr]
-        #check what button is pressed
-        if request.method == "POST":
-            button = request.form["submit_button"]
-            if(button == "NEXT"):
-                if curr == folder_len:
-                    print(folder_len)
-                else:
-                    curr += 1
-            if(button == "PREV"):
-                if curr == 0:
-                    print("No previous files")
-                else:
-                    curr -= 1
-            if(button == "NEW"):
-                return redirect(url_for('upload', group = temp_group.id))
-            if(button == "UP"):
-                temp_submissions[curr].upvote()
-                print("Current vote counter:")
-                print(temp_submissions[curr].votes)
-                return redirect(url_for('results'))        
-            #load next media file
-            if(button == "SUBMIT"):
-                print(form.comment.data)
-                temp_submissions[curr].commnet(form.comment.data)
-
-            return redirect(url_for('watch', curr=curr))
-        # Load the webpage
-    else: return redirect(url_for('login'))
-    return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, comments = temp_submissions[curr].comments , user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, form = form)
+    curr = int(curr)
+    folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) -1
+    img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[curr]
+    #check what button is pressed
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        button = request.form["submit_button"]
+        if(button == "NEXT"):
+            if curr == folder_len:
+                print(folder_len)
+            else:
+                curr += 1
+        if(button == "PREV"):
+            if curr == 0:
+                print("No previous files")
+            else:
+                curr -= 1
+        if(button == "NEW"):
+            return redirect(url_for('upload', group = temp_group.id))
+        if(button == "UP"):
+            temp_submissions[curr].upvote()
+            print("Current vote counter:")
+            print(temp_submissions[curr].votes)
+            return redirect(url_for('results'))
+        if(button == "Log-out"):
+            session.clear()
+            return redirect(url_for('login')) 
+        #load next media file
+        return redirect(url_for('watch', curr=curr))
+    # Load the webpage
+    else:
+            return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
     
 
  #/results, webpage to veiw the top upvoted
@@ -310,3 +471,4 @@ if __name__ == '__main__':
     app.run(debug=True, host = "0.0.0.0", port = 25565)
     '''
     app.run(debug=True)
+    #database.finished()
