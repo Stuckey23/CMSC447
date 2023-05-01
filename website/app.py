@@ -108,46 +108,6 @@ tasks = [
 
 #tasks = []
 
-
-
-# def getFriends():
-#     friends = [
-#         {"name": "ThwompFriend12", "isFriend": True},
-#         {"name": "ToothStealer", "isFriend": False}
-#     ]
-#     return friends
-
-    
-# Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
-
-friends = [
-    {"name": "ThwompFriend12", "isFriend": True},
-    {"name": "ToothStealer", "isFriend": False}
-]
-
-# submissions = [
-#     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
-#     {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
-# ]
-
-submissions = []
-
-
-tasks = [
-    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
-    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
-]
-
-#tasks = []
-
-
-
 #FAKE DATABSE!
 #This is here beacause I havent connected the website to the data base yet
 temp_submissions = []  #temp array to all quest submissions
@@ -220,7 +180,8 @@ def handleHome(request):
             return functions[request.form.get('button')](request.form.get('value'))
 
 def newSubmission(arg):
-    return redirect(url_for('upload', group = arg))
+    #groups is hard coded since we cant switch groups yet
+    return redirect(url_for('upload', group = 0))
 
 def viewSubmission(arg):
     return redirect(url_for('watch', curr = 0))
@@ -348,7 +309,7 @@ def create():
         quest = form.quest.data # First grab the file
         rules = form.rules.data
         tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
-        return redirect(url_for('upload', group = len(tasks) - 1))
+        return redirect(url_for('home'))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
@@ -379,7 +340,7 @@ def upload(group):
             #update the fake databse
             sub =Submission(session["user"], file.filename)
             temp_submissions.append(sub)
-            return redirect(url_for('watch', curr = 0))
+            return redirect(url_for('watch', curr = 0, group = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
@@ -387,6 +348,7 @@ def upload(group):
 #returns the next or previous submission, or redirects to the voting page
 @app.route('/watch/<curr>', methods=['GET', 'POST'])
 def watch(curr):
+    form = CommentForm()
     curr = int(curr)
     folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) -1
     img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[curr]
@@ -424,11 +386,15 @@ def watch(curr):
         if(button == "Log-out"):
             session.clear()
             return redirect(url_for('login')) 
+        if(button == "SUBMIT"):
+                print(form.comment.data)
+                temp_submissions[curr].commnet(form.comment.data)
+
         #load next media file
         return redirect(url_for('watch', curr=curr))
     # Load the webpage
     else:
-            return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
+            return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, form = form)
     
 
  #/results, webpage to veiw the top upvoted
