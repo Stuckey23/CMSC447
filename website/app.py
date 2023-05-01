@@ -21,18 +21,7 @@ video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 
-# Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
 
-friends = [
-    {"name": "ThwompFriend12", "isFriend": True},
-    {"name": "ToothStealer", "isFriend": False}
-]
 
 #root of the website folder
 root_path = os.path.dirname(os.path.abspath(__file__))
@@ -79,13 +68,40 @@ class Submission():
         self.votes -=1
 
     
-# def getGroups():
-#   
-#     return groups
+# Hard coded groups and friends. This eventually needs to come from the database
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
+]
 
-# def getFriends():
-#     
-#     return friends
+friends = [
+    {"name": "ThwompFriend12", "isFriend": True},
+    {"name": "ToothStealer", "isFriend": False}
+]
+
+submissions = [
+    {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
+    {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
+]
+
+# submissions = []
+
+
+tasks = [
+    {"title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
+    {"title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
+]
+
+#tasks = []
+
+
+
+#FAKE DATABSE!
+#This is here beacause I havent connected the website to the data base yet
+temp_submissions = []  #temp array to all quest submissions
+temp_group = Groups("none", 0)#temp group fo testing
 
 #mediaType(), given an image name checks what type of media was uploaded
 #returns an int 1-image, 2-video, 3-audio
@@ -100,10 +116,7 @@ def mediaType(img_name):
         media_type = 0 # unsupported media format
     return media_type
 
-#FAKE DATABSE!
-#This is here beacause I havent connected the website to the data base yet
-temp_submissions = []  #temp array to all quest submissions
-temp_group = Groups("none", 0)#temp group fo testing
+
 
 
 #creates the website on localhost:5000
@@ -136,6 +149,23 @@ def login():
         
     # Close out of DB after using DB / webapp
     return(render_template('login.html', form = form))
+
+def handleHome(request):
+    functions = {
+        "newSubmission": newSubmission,
+        "viewSubmission": viewSubmission
+    }
+
+    if request.method == "POST":
+        formType = request.form.get('formType')
+        if formType == "home":
+            return functions[request.form.get('button')](request.form.get('value'))
+
+def newSubmission(arg):
+    return redirect(url_for('upload', group = arg))
+
+def viewSubmission(arg):
+    return redirect(url_for('watch', curr = 0))
 
 def handleSidebar(request):
     functions = {
@@ -225,18 +255,21 @@ def home():
     if results != None:
         return results
     
-    quest_check = 0 #checks if a quest has been made yet
-    if(temp_group.quest != ""):
-        quest_check = 1
+    results = handleHome(request)
+    if results != None:
+        return results
+    
+    questExists = len(tasks)
     
     formType = request.form.get('formType')
-    if request.method == "POST" and formType != "sidebar":
-        if(quest_check):
+    if request.method == "POST" and (formType != "sidebar" and formType != "home"):
+        if questExists:
             return redirect(url_for('upload', group = temp_group.id))
         else:
             return redirect(url_for('create'))
     
-    return render_template('index.html', quest_check = quest_check, user = session["user"], groups=groups, friends=friends)
+
+    return render_template('index.html', questExists = questExists, user = session["user"], groups=groups, friends=friends, tasks=tasks)
 
 
 #/create, collects text information to create a task

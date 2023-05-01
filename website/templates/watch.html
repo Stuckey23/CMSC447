@@ -8,7 +8,7 @@
             {% include "partials/sidebar.html" %}
         </div>
         <div style="flex-grow: 1;">
-            <h1 style="text-align:center">Veiwing Submissions</h1>
+            <h1 style="text-align:center">Viewing Submissions</h1>
             <h2 style="text-align:center"> {{filename}} </h2style>
             <div>by: {{user}}</div>
             <div style="text-align: center">
@@ -23,7 +23,7 @@
                         <source src="{{url_for('static', filename=user_input)}}">
                     </audio>
                 {% else: %}
-                    <h1>Unsupported fromat</h1>
+                    <h1>Unsupported format</h1>
                 {% endif %}
                 
 
