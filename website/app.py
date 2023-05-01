@@ -69,17 +69,6 @@ class Submission():
 
     
 # Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
-
-friends = [
-    {"name": "ThwompFriend12", "isFriend": True},
-    {"name": "ToothStealer", "isFriend": False}
-]
 
 # submissions = [
 #     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
@@ -88,11 +77,30 @@ friends = [
 
 submissions = []
 
-
 tasks = [
     {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
     {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
 ]
+
+tempTasks2 = [
+    {"id": 0, "title": "Fake task 3", "rules": "3", "submissions":submissions},
+    {"id": 1, "title": "Fake task 4", "rules": "4", "submissions": submissions}
+]
+
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
+]
+
+friends = [
+    {"name": "ThwompFriend12", "isFriend": True},
+    {"name": "ToothStealer", "isFriend": False}
+]
+
+
+
 
 #tasks = []
 
@@ -154,7 +162,8 @@ def handleHome(request):
     functions = {
         "newSubmission": newSubmission,
         "viewSubmission": viewSubmission,
-        "newQuest": createQuest
+        "newQuest": createQuest,
+        "viewResults": viewResults
     }
 
     if request.method == "POST":
@@ -170,6 +179,10 @@ def viewSubmission(arg):
 
 def createQuest(arg):
     return redirect(url_for('create'))
+
+def viewResults(arg):
+    return redirect(url_for('results'))
+    
     
 
 def handleSidebar(request):
@@ -264,10 +277,10 @@ def home():
     if results != None:
         return results
     
-    questExists = len(tasks)
+    
     
 
-    return render_template('index.html', questExists = questExists, user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=tasks)
+    return render_template('index.html', user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=groups[temp_group.id].get("tasks"))
 
 
 #/create, collects text information to create a task
