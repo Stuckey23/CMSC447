@@ -88,10 +88,10 @@ tempTasks2 = [
 ]
 
 groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
+    {"id": 0, "name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
+    {"id": 1, "name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
+    {"id": 2, "name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
+    {"id": 3, "name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
 ]
 
 friends = [
@@ -109,7 +109,7 @@ friends = [
 #FAKE DATABSE!
 #This is here beacause I havent connected the website to the data base yet
 temp_submissions = []  #temp array to all quest submissions
-temp_group = Groups("none", 0)#temp group fo testing
+currGroup = groups[0]
 
 #mediaType(), given an image name checks what type of media was uploaded
 #returns an int 1-image, 2-video, 3-audio
@@ -194,7 +194,8 @@ def handleSidebar(request):
         "acceptGroup": acceptGroup,
         "declineGroup": declineGroup,
         "newGroup": newGroup,
-        "log-out": logOut
+        "log-out": logOut,
+        "groupSelect": groupSelect
         }
     
     if request.method == "POST":
@@ -251,7 +252,17 @@ def logOut(arg):
     print("User logged out")
     return redirect(url_for('login')) 
 
+def groupSelect(arg):
+    #nextGroup = arg
+    currGroup = getGroup(arg)
+    print("Changed to group: %s" % (currGroup.get("name")))
+    return redirect(url_for('home'))
 
+def getGroup(id):
+    for group in groups:
+        if group.get("id") == int(id):
+            return group
+    return None
 
 
 def validateUser():
@@ -280,7 +291,7 @@ def home():
     
     
 
-    return render_template('index.html', user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=groups[temp_group.id].get("tasks"))
+    return render_template('index.html', user = session["user"], currGroup = currGroup, groups=groups, friends=friends, tasks=currGroup.get("tasks"))
 
 
 #/create, collects text information to create a task
@@ -371,7 +382,7 @@ def watch(curr):
             else:
                 curr -= 1
         if(button == "NEW"):
-            return redirect(url_for('upload', group = temp_group.id))
+            return redirect(url_for('upload', group = currGroup["id"]))
         if(button == "UP"):
             temp_submissions[curr].upvote()
             print("Current vote counter:")

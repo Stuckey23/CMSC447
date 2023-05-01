@@ -11,10 +11,10 @@
         </div>
         <div style="flex-grow: 1;">
             <h1 style="text-align:center">
-                {{groups[currGroup].name}} Quests: 
+                {{currGroup.get("name")}} Quests: 
                 <form action="#" method="post">
                     <input type="hidden" name="formType" value="home">
-                    <input type="hidden" name="value" value={{currGroup}}>
+                    <input type="hidden" name="value" value={{currGroup.id}}>
                     <button type="submit" name="button" value="newQuest">Create New Quest</button>
                 </form> 
             </h1>
