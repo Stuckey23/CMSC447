@@ -8,7 +8,7 @@
             {% include "partials/sidebar.html" %}
         </div>
         <div style="flex-grow: 1;">
-            <h1 style="text-align:center">Veiwing Submissions</h1>
+            <h1 style="text-align:center">Viewing Submissions</h1>
             <h2 style="text-align:center"> {{filename}} </h2style>
             <div>by: {{user}}</div>
             <div style="text-align: center">
@@ -23,7 +23,7 @@
                         <source src="{{url_for('static', filename=user_input)}}">
                     </audio>
                 {% else: %}
-                    <h1>Unsupported fromat</h1>
+                    <h1>Unsupported format</h1>
                 {% endif %}
                 
 
@@ -31,16 +31,16 @@
                 <h3>Load Another Submission</h3>
                     <form method="post" action="#">
                         {%if curr != 0:%}
-                            <button type="submit" name="submit_button" value="PREV">PREV</button>
+                            <input type="submit" name="submit_button" value="PREV">
                         {% endif %}
                         {%if curr != files:%} 
-                            <button type="submit" name="submit_button" value="NEXT">NEXT</button>
+                            <input type="submit" name="submit_button" value="NEXT">
                         {% endif %}
                         <h4> Upload Another Submission:
-                            <button type="submit" name="submit_button" value="NEW">UPLOAD</button>        
+                            <input type="submit" name="submit_button" value="NEW">      
                         <h4>
                         <h5> UPVOTE:
-                            <button type="submit" name="submit_button" value="UP">UPVOTE</button>        
+                            <input type="submit" name="submit_button" value="UP">       
                         <h5>
                     </form>
         </div>
