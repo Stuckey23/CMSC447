@@ -4,8 +4,9 @@
 </head>
 <body>
     <!-- Sidebar Title -->
-    <h1 style="text-align:center"> 
-        CHKD  <img src="/static/icons/checkmark.png">
+    <h1 style="text-align: center;"> 
+        <button class="home_button" type="button"><img src="/static/icons/home_button.png"></button>
+        CHKD <img class="center_text" src="/static/icons/checkmark.png">
     </h1>
 
     <!-- Horizontal Line -->
@@ -13,7 +14,7 @@
 
     <!-- Group Section -->
     <!-- Group Header -->
-    <div class="container" style="display: flex;">
+    <div class="container" style="display: flex; margin-bottom: 5px;">
         <div style="width: 50%;">
             <b style="color: white; font-size: 26px;">
                 Groups
@@ -22,7 +23,7 @@
         <div style="flex-grow: 1;">
             <form action="#" method="post">
                 <input type="hidden" name="formType" value="sidebar">
-                <button type="submit" name="button" value="newGroup" style="float: right;>
+                <button type="submit" name="button" value="newGroup" style="float: right;">
                     New Group
                 </button>
             </form> 
@@ -33,7 +34,7 @@
     <div>
         <!-- Makes a row for each group -->
         {% for group in groups %}
-            <div class="container" style="display: flex; color: white; font-family: Verdana, sans-serif;">
+            <div class="container" style="display: flex; color: white; font-family: Verdana, sans-serif; margin-bottom: 7px;">
                 <div style="flex-grow: 1;"> 
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
@@ -41,7 +42,7 @@
                         <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
                     </form> 
                 </div>
-                <div style="flex-grow: 1;">
+                <div style="flex-grow: 1; float: right;">
                     <!-- Has dot if there's a notification in that group. Replace * with small image -->
                     {% if group.hasNotification %}
                         *
@@ -71,7 +72,7 @@
         <div style="flex-grow: 1;">
             <form action="#" method="post">
                 <input type="hidden" name="formType" value="sidebar">
-                <button type="submit" name="button" value="requestFriend" style="float: right;>
+                <button type="submit" name="button" value="requestFriend" style="float: right;">
                     Add Friend
                 </button>
             </form> 
@@ -126,7 +127,7 @@
                 <button type="submit" name="button" value="log-out">Log out</button>
             </form>
         </div>
-        <div>{{user}}</div> 
+        <div style="color: white;">{{user}}</div> 
     </div>
 </body>
 </html>
