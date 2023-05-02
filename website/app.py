@@ -254,6 +254,8 @@ def logOut(arg):
 
 def groupSelect(arg):
     #nextGroup = arg
+    global currGroup
+    #print(currGroup)
     currGroup = getGroup(arg)
     print("Changed to group: %s" % (currGroup.get("name")))
     return redirect(url_for('home'))
