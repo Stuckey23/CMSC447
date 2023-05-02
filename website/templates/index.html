@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" href='/static/home.css' />
+
     <title>Home</title>
 </head>
 
-
 <body>
     <div class="container" style="display: flex;">
-        <div style="width: 35%;">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column opacity;">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1;">
+        <div style="flex-grow: 1; margin-left: 20px;" class="column;">
             <h1 style="text-align:center">
                 {{currGroup.get("name")}} Quests: 
                 <form action="#" method="post">
@@ -21,11 +22,11 @@
 
             {% for task in tasks %}
                 
-                    <div style="text-align:center"> 
+                    <div style="text-align:center;"> 
                         <h1>{{task.title}}</h1>
                         <h3>{{task.rules}}</h3>
                     </div>
-                    <div class="container" style="display: flex;">
+                    <div class="container" style="display: flex; text-align: center;">
                         <div style="flex-grow: 1;">
                             <form action="#" method="post">
                                 <input type="hidden" name="formType" value="home">

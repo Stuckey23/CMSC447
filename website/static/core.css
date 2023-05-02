@@ -1,13 +1,15 @@
 body {
-    background: black;
+    background: linear-gradient(30deg, #393D3F, #FDFDFF, #C6C5B9, #62929E, #546A7B);
     color: white;
-    margin-top: 50px;
+    margin-top: 45px;
     margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 350px;
 }
 
 .login 
 {
-    padding: 100px;
+    padding: 50px;
     text-align: center;    
 }
 
@@ -22,6 +24,7 @@ h1 {
     letter-spacing: 5px;
     font-size: 5em;
     color: white;
+    animation: blink-text 3.5s linear infinite;
 }
    
 p {
@@ -30,9 +33,25 @@ p {
     color: DarkSlateGray;
 }
 
-.center {
-    margin: auto;
-    width: 50%;
-    border: 3px solid green;
-    padding: 10px;
+.center_text {
+    text-align: center;
+    margin-left: 30px;
+    margin-right: -3px;
+}
+
+@keyframes blink-text {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+img {
+    width: auto;
+    height: 100px;
 }
