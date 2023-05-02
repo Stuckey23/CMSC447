@@ -21,7 +21,24 @@ video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 
+# Hard coded groups and friends. This eventually needs to come from the database
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
+]
 
+        # ADD FRIENDS
+        # userA = session.get("user")
+        #result = chkd_db.addFriend(userA, userB)
+        #if result == 0:
+        #   flash("You already are friends with this user.")
+        #elif result == 1:
+        #   do something to update screen to reflect changes (add them to the list)
+        #   flash("You are now friends with this user.")
+        #else:
+        #   flash("Something went wrong.")
 
 #root of the website folder
 root_path = os.path.dirname(os.path.abspath(__file__))
@@ -317,6 +334,7 @@ def create():
         quest = form.quest.data # First grab the file
         rules = form.rules.data
         tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
+        #chkd_db.newChallenge(user, title, description, group)
         return redirect(url_for('upload', group = len(tasks) - 1))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
@@ -348,6 +366,14 @@ def upload(group):
             #update the fake databse
             sub =Submission(session["user"], file.filename)
             temp_submissions.append(sub)
+
+            # Update the Database
+            file = form.file.data # First grab the file
+            user = session["user"]
+            challenge_id = 1
+
+            # Call to Database
+            #chkd_db.newPost(user, file, challenge_id)
             return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
@@ -400,7 +426,7 @@ def watch(curr):
             return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
     
 
- #/results, webpage to veiw the top upvoted
+ #/results, webpage to viww the top upvoted
  #this is not fully coded yet
 @app.route('/results', methods=['GET', 'POST'])
 def results():
