@@ -16,9 +16,10 @@
             Groups
         </div>
         <div style="flex-grow: 1;">
-            <button type="button">
-                New Group
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="newGroup">New Group</button>
+            </form> 
         </div>
 
     </div>
@@ -28,7 +29,11 @@
         {% for group in groups %}
             <div class="container" style="display: flex;">
                 <div style="flex-grow: 1;"> 
-                    {{group.name}}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.id}}">
+                        <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
+                    </form> 
                 </div>
                 <div style="flex-grow: 1;">
                     <!-- Has dot if there's a notification in that group. Replace * with small image -->
@@ -56,9 +61,10 @@
             Friends
         </div>
         <div style="flex-grow: 1;">
-            <button type="button">
-                Add Friend
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="requestFriend">Add Friend</button>
+            </form> 
         </div>
 
     </div>
@@ -74,17 +80,19 @@
                     <!-- Checks friend status to decide which to show -->
                     {% if friend.isFriend %}
                         <!-- Replace buttons with hamburger menu? -->
-                        <button type="button">
-                            Remove friend
-                        </button>
+                        <form action="#" method="post">
+                            <input type="hidden" name="formType" value="sidebar">
+                            <input type="hidden" name="value" value="{{friend.name}}">
+                            <button type="submit" name="button" value="removeFriend">Remove Friend</button>
+                        </form> 
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
-                        <button type="button">
-                            Accept
-                        </button>
-                        <button type="button">
-                            Decline
-                        </button>
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{friend.name}}">
+                        <button type="submit" name="button" value="acceptFriend">Accept</button>
+                        <button type="submit" name="button" value="declineFriend">Decline</button>
+                    </form> 
                     {%endif%}
                 </div>
             </div>
@@ -97,14 +105,12 @@
     <!-- Footer -->
     <div class="container" style="display: flex;">
         <div style="flex-grow: 1;">
-            <button type="button">
-                Settings
-            </button>
-            <button type="button">
-                Log-out
-            </button>
+            <form action="#" method="post">
+                <input type="hidden" name="formType" value="sidebar">
+                <button type="submit" name="button" value="log-out">Log out</button>
+            </form>
         </div>
-
+        <div>{{user}}</div> 
     </div>
 </body>
 </html>
