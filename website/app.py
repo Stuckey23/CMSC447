@@ -61,15 +61,16 @@ class Groups():
         self.quest = ""
         self.rules = ""
         self.submissions = []
-    def add_quest(self, quest, rules):
+    def add_task(self, quest, rules):
         self.quest = quest
         self.rules = rules
     def add_submission(self, submission):
         self.submissions.append(submission)
 
 class Submission():
-    def __init__(self, user, file):
+    def __init__(self, user, task, file):
         self.user = user
+        self.task = task
         self.file = file
         self.votes = 0
         self.comments = []
@@ -105,13 +106,6 @@ tasks = [
     {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
     {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
 ]
-
-#tasks = []
-
-#FAKE DATABSE!
-#This is here beacause I havent connected the website to the data base yet
-temp_submissions = []  #temp array to all quest submissions
-temp_group = Groups("none", 0)#temp group fo testing
 
 
 #mediaType(), given an image name checks what type of media was uploaded
@@ -162,7 +156,7 @@ def login():
 
             # Go to home page
             session.pop('_flashes',None)
-            return redirect(url_for('home'))
+            return redirect(url_for('home', group = 0))
         
     # Close out of DB after using DB / webapp
     return(render_template('login.html', form = form))
@@ -187,7 +181,7 @@ def viewSubmission(arg):
     return redirect(url_for('watch', curr = 0))
 
 def createQuest(arg):
-    return redirect(url_for('create'))
+    return redirect(url_for('create', arg))
     
 
 def handleSidebar(request):
@@ -284,14 +278,14 @@ def home():
     
     questExists = len(tasks)
     
-
-    return render_template('index.html', questExists = questExists, user = session["user"], currGroup = temp_group.id, groups=groups, friends=friends, tasks=tasks)
+    return render_template('index.html', questExists = questExists, user = session["user"], group = temp_group.id, groups=groups, friends=friends, tasks=tasks)
 
 
 #/create, collects text information to create a task
 #returns the upload page after any text is sumbitted
-@app.route('/create', methods=['GET', 'Post'])
-def create():
+@app.route('/create/<group>', methods=['GET', 'Post'])
+def create(group):
+    group = group
     form = QuestForm()
 
     #check that the user actually sigined in and didn't manually type the url
