@@ -89,23 +89,6 @@ class Submission():
     def downvote(self):
         self.votes -=1
 
-    
-# def getGroups():
-#     groups = [
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-#         {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-#     ]
-#     return groups
-
-# def getFriends():
-#     friends = [
-#         {"name": "ThwompFriend12", "isFriend": True},
-#         {"name": "ToothStealer", "isFriend": False}
-#     ]
-#     return friends
-
 #mediaType(), given an image name checks what type of media was uploaded
 #returns an int 1-image, 2-video, 3-audio
 def mediaType(img_name):
@@ -186,14 +169,14 @@ def create():
         rules = form.rules.data
         temp_group.add_quest(quest, rules)
 
-        # Get the USER ID and GROUP ID
-
         # Get the input from user
+        user = session["user"]
+        group = 'EVERYONE' # get the group -- need to find way to get the group name
         title = str(form.quest.data)
         description = str(form.rules.data)
     
         # Call to Database
-        #chkd_db.newChallenge(user, title, description, group)
+        chkd_db.newChallenge(user, group, title, description)
         
         return redirect(url_for('upload', group = temp_group.id))
     return render_template("create.html", form = form, groups=groups, friends=friends)
@@ -216,12 +199,12 @@ def upload(group):
         temp_submissions.append(sub)
 
         # Update the Database
-        file = form.file.data # First grab the file
+        submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
         user = session["user"]
         challenge_id = 1
 
         # Call to Database
-        chkd_db.newPost(user, file, challenge_id)
+        chkd_db.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
@@ -261,7 +244,7 @@ def watch(curr):
             return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
     
 
- #/results, webpage to viww the top upvoted
+ #/results, webpage to view the top upvoted
  #this is not fully coded yet
 @app.route('/results', methods=['GET', 'POST'])
 def results():
