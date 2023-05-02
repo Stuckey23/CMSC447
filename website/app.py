@@ -334,7 +334,18 @@ def create():
         quest = form.quest.data # First grab the file
         rules = form.rules.data
         tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
-        #chkd_db.newChallenge(user, title, description, group)
+        
+        # add quest to group here
+
+        # Get the input from user
+        user = session["user"]
+        group = 'EVERYONE' # get the group -- need to find way to get the group name
+
+    
+        # Call to Database
+        #chkd_db.newChallenge(user, group, quest, rules)
+        
+        #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('upload', group = len(tasks) - 1))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
@@ -367,14 +378,15 @@ def upload(group):
             sub =Submission(session["user"], file.filename)
             temp_submissions.append(sub)
 
-            # Update the Database
-            file = form.file.data # First grab the file
-            user = session["user"]
-            challenge_id = 1
+        # Update the Database
+        submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
+        user = session["user"]
+        challenge_id = 1
 
-            # Call to Database
-            #chkd_db.newPost(user, file, challenge_id)
-            return redirect(url_for('watch', curr = 0))
+        # Call to Database
+        #chkd_db.newPost(user, submissionFile, challenge_id)
+
+        return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
@@ -426,7 +438,7 @@ def watch(curr):
             return  render_template('watch.html', user = temp_submissions[curr].user, filename = temp_submissions[curr].file, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends)
     
 
- #/results, webpage to viww the top upvoted
+ #/results, webpage to view the top upvoted
  #this is not fully coded yet
 @app.route('/results', methods=['GET', 'POST'])
 def results():
