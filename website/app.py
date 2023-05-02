@@ -144,36 +144,7 @@ def mediaType(img_name):
 
 
 
-#creates the website on localhost:5000
-@app.route('/', methods=['GET',"POST"])
 
-#login page
-@app.route('/login', methods=['GET',"POST"])
-def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # Get the input from user
-        username = str(form.name.data)
-        password = str(form.password.data)
-
-        # Call to Database
-        user_id = database.login(username, password)
-
-        # User login failed
-        if(user_id == -1):
-            flash("The username or password you’ve entered is incorrect. Try again")
-            print("Fail")
-        
-        # User login success!
-        else:
-            session["user"] = username
-
-            # Go to home page
-            session.pop('_flashes',None)
-            return redirect(url_for('home'))
-        
-    # Close out of DB after using DB / webapp
-    return(render_template('login.html', form = form))
 
 def handleHome(request):
     functions = {
@@ -289,6 +260,36 @@ def validateUser():
         return None
     else: return redirect(url_for('login'))         
 
+#creates the website on localhost:5000
+@app.route('/', methods=['GET',"POST"])
+
+#login page
+@app.route('/login', methods=['GET',"POST"])
+def login():
+    form = LoginForm()
+    if request.method == "POST":
+        # Get the input from user
+        username = str(form.name.data)
+        password = str(form.password.data)
+
+        # Call to Database
+        user_id = database.login(username, password)
+
+        # User login failed
+        if(user_id == -1):
+            flash("The username or password you’ve entered is incorrect. Try again")
+            print("Fail")
+        
+        # User login success!
+        else:
+            session["user"] = username
+
+            # Go to home page
+            session.pop('_flashes',None)
+            return redirect(url_for('home'))
+        
+    # Close out of DB after using DB / webapp
+    return(render_template('login.html', form = form))
 
 #home page
 @app.route('/home', methods=['GET',"POST"])
