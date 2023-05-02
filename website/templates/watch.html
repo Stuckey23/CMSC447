@@ -36,12 +36,9 @@
                 {%if curr != files:%} 
                     <button type="submit" name="submit_button" value="NEXT">NEXT</button>
                 {% endif %}
-                <h4> Upload Another Submission:
-                    <button type="submit" name="submit_button" value="NEW">UPLOAD</button>        
-                <h4>
-                <h5> UPVOTE:
+                <h4> UPVOTE:
                     <button type="submit" name="submit_button" value="UP">UPVOTE</button>        
-                <h5>
+                <h4>
             </form>
 
             <h6>  
@@ -49,7 +46,7 @@
             <form method="POST" action="#">
                 {{ form.csrf_token }}
                 <div>Comments</div>
-                {{ form.comment(size=10, placeholder = "add comment", rows = 10, cols = 0, style="resize:none") }}
+                {{ form.comment(size=10, placeholder = "add comment", rows = 10, cols = 100, style="resize:none") }}
                 <div></div>
                 <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
                 {% for comment in comments: %}
