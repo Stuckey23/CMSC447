@@ -31,7 +31,7 @@ groups = [
 
         # ADD FRIENDS
         # userA = session.get("user")
-        #result = chkd_db.addFriend(userA, userB)
+        #result = database.addFriend(userA, userB)
         #if result == 0:
         #   flash("You already are friends with this user.")
         #elif result == 1:
@@ -344,7 +344,7 @@ def create():
 
     
         # Call to Database
-        #chkd_db.newChallenge(user, group, quest, rules)
+        #database.newChallenge(user, group, quest, rules)
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('upload', group = len(tasks) - 1))
@@ -385,7 +385,7 @@ def upload(group):
         challenge_id = 1
 
         # Call to Database
-        #chkd_db.newPost(user, submissionFile, challenge_id)
+        #database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
