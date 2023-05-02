@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" href='/static/home.css' />
+
     <title>Results</title>
 </head>
 <body>
+    <!--Top bar, includes home, search buttons-->
+    <div class="container spacing" style="display: flex;">
+        <button type="button"><img src="/static/icons/home.png"></button>
+    </div>
     <div class="container" style="display: flex;">
-        <div style="width: 35%;">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column left opacity;">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1;">
+        <div style="flex-grow: 1;" class="column right;">
             <h1 style="text-align:center">TOP RATED:</h1>
             <h2 style="text-align:center"> {{file}} by {{user}}</h2>
             <h3 style="text-align:center"> VOTES: {{votes}} </h3style>
@@ -23,7 +29,7 @@
                         <source src="{{url_for('static', filename=user_input)}}">
                     </audio>
                 {% else: %}
-                    <h1>Unsupported fromat</h1>
+                    <h1>Unsupported format</h1>
                 {% endif %}
                 
 

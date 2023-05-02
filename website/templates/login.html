@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!--  Load CSS in Flask with html-->
+    <!--  Load CSS in Flask with html-->
     <link rel="stylesheet" href='/static/core.css' />
-  </head>
-  <body>
+</head>
+<body>
     <div class="login">
    
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -18,7 +18,11 @@
         {% endif %}
         {% endwith %}
       
-        <h1>CHKD</h1>
+        <div>
+            <img src="/static/icons/checkmark.png">
+            <h1>CHKD</h1>
+
+        </div>
         <form method="POST">
             {{form.name(size = 30, placeholder="Username" )}}
             <br><br>

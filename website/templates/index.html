@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <head>
+    <link rel="stylesheet" href='/static/home.css' />
+
     <title>Home</title>
 </head>
 
-
 <body>
+    <!--Top bar, includes home, search buttons-->
+    <div class="container spacing" style="display: flex;">
+        <button type="button"><img src="/static/icons/home_button.png"></button>
+        <button type="button" style="margin-left: 10px;"><img src="/static/icons/home.png"></button>
+        <button type="button" style="margin-left: 10px;"><img src="/static/icons/white_home_button.png"></button>
+    </div>
     <div class="container" style="display: flex;">
-        <div style="width: 35%;">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column opacity;">
             {% include "partials/sidebar.html" %}
         </div>
-        <div style="flex-grow: 1;">
+        <div style="flex-grow: 1;" class="column;">
             <h1 style="text-align:center">
                 {{currGroup.get("name")}} Quests: 
                 <form action="#" method="post">

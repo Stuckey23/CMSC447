@@ -1,9 +1,11 @@
-
 <!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href='/static/home.css' />
+</head>
 <body>
     <!-- Sidebar Title -->
     <h1 style="text-align:center"> 
-        CHKD Sidebar 
+        CHKD  <img src="/static/icons/checkmark.png">
     </h1>
 
     <!-- Horizontal Line -->
@@ -13,12 +15,16 @@
     <!-- Group Header -->
     <div class="container" style="display: flex;">
         <div style="width: 50%;">
-            Groups
+            <b style="color: white; font-size: 26px;">
+                Groups
+            </b>
         </div>
         <div style="flex-grow: 1;">
             <form action="#" method="post">
                 <input type="hidden" name="formType" value="sidebar">
-                <button type="submit" name="button" value="newGroup">New Group</button>
+                <button type="submit" name="button" value="newGroup" style="float: right;>
+                    New Group
+                </button>
             </form> 
         </div>
 
@@ -27,7 +33,7 @@
     <div>
         <!-- Makes a row for each group -->
         {% for group in groups %}
-            <div class="container" style="display: flex;">
+            <div class="container" style="display: flex; color: white; font-family: Verdana, sans-serif;">
                 <div style="flex-grow: 1;"> 
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
@@ -58,12 +64,16 @@
     <!-- Friend Header -->
     <div class="container" style="display: flex;">
         <div style="width: 50%;">
-            Friends
+            <b style="color: white; font-size: 26px;">
+                Friends
+            </b>
         </div>
         <div style="flex-grow: 1;">
             <form action="#" method="post">
                 <input type="hidden" name="formType" value="sidebar">
-                <button type="submit" name="button" value="requestFriend">Add Friend</button>
+                <button type="submit" name="button" value="requestFriend" style="float: right;>
+                    Add Friend
+                </button>
             </form> 
         </div>
 
@@ -73,7 +83,7 @@
         <!-- Makes a row for each friend -->
         {% for friend in friends %}
             <div class="container" style="display: flex;">
-                <div style="flex-grow: 1;"> 
+                <div style="flex-grow: 1; color: white; font-family: Verdana, sans-serif;"> 
                     {{friend.name}}
                 </div>
                 <div style="flex-grow: 1;">
@@ -83,15 +93,21 @@
                         <form action="#" method="post">
                             <input type="hidden" name="formType" value="sidebar">
                             <input type="hidden" name="value" value="{{friend.name}}">
-                            <button type="submit" name="button" value="removeFriend">Remove Friend</button>
+                            <button type="submit" name="button" value="removeFriend" style="float: right; margin-bottom: 5px;">
+                                Remove Friend
+                            </button>
                         </form> 
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
                         <input type="hidden" name="value" value="{{friend.name}}">
-                        <button type="submit" name="button" value="acceptFriend">Accept</button>
-                        <button type="submit" name="button" value="declineFriend">Decline</button>
+                        <button type="submit" name="button" value="acceptFriend" style="float: right; margin-left: 5px;">
+                            Accept
+                        </button>
+                        <button type="submit" name="button" value="declineFriend" style="float: right;">
+                            Decline
+                        </button>
                     </form> 
                     {%endif%}
                 </div>
