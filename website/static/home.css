@@ -69,3 +69,15 @@ img {
 .opacity {
     background: rgba(3, 172, 240, 0.4);
 }
+
+.center_text {
+    text-align: center;
+    margin-left: -8px;
+    margin-bottom: -3px;
+}
+
+.home_button {
+    float: left;
+    margin-left: 5px;
+    margin-right: -45px;
+}
