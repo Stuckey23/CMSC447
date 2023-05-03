@@ -9,6 +9,7 @@ from wtforms.widgets import TextArea
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileField, FileAllowed
 import os
+import shutil
 from wtforms.validators import InputRequired, DataRequired, Length
 import socket
 
@@ -46,7 +47,16 @@ app = Flask(__name__)
 # following string is stored in cookies
 app.config['SECRET_KEY'] = 'nerf'
 
+
 app.config['MEDIA_FOLDER'] = 'static\media'
+app.config['OLD_FOLDER'] = 'static\old'
+
+#clear out the media file
+if(os.path.exists(os.path.join(root_path, app.config['MEDIA_FOLDER']))):
+    os.rename(os.path.join(root_path, app.config['MEDIA_FOLDER']), os.path.join(root_path, app.config['OLD_FOLDER']))
+    shutil.rmtree(os.path.join(root_path, app.config['OLD_FOLDER']))
+os.mkdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))
+
 # 10 mb content length
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
@@ -71,10 +81,13 @@ class LoginForm(FlaskForm):
     login = SubmitField("Login")
 
 #stores group info
+# {"id": 0, "name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
+
 class Groups():
     def __init__(self, users, id):
         self.users = users #users in the group will be added later
-        self.id = id       #group id 
+        self.id = id       #group id
+        self.name = "group" + str(id) 
         self.tasks = []    #lists of all tasks 
         #creates group folder nside of media
         self.group_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(id)))
@@ -127,18 +140,12 @@ class Submission():
     
 # Hard coded groups and friends. This eventually needs to come from the database
 
-# submissions = [
-#     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
-#     {"user":"stuckey", "filename":"media/SS2.png", "mediaType": 1}
-# ]
-
-#submissions = []
-
 
 #tasks = [
 #    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
 #    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
 #]
+"""
 tasks = [
     {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
     {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
@@ -148,12 +155,14 @@ tempTasks2 = [
     {"id": 0, "title": "Fake task 3", "rules": "3", "submissions":submissions},
     {"id": 1, "title": "Fake task 4", "rules": "4", "submissions": submissions}
 ]
-
+"""
 groups = [
+    """"
     {"id": 0, "name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
     {"id": 1, "name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
     {"id": 2, "name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
     {"id": 3, "name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
+    """
 ]
 
 friends = [
@@ -163,18 +172,6 @@ friends = [
 
 
 
-
-#tasks = []
-
-
-
-#FAKE DATABSE!
-#This is here beacause I havent connected the website to the data base yet
-temp_submissions = []  #temp array to all quest submissions
-currGroup = groups[0]
-
-#mediaType(), given an image name checks what type of media was uploaded
-#returns an int 1-image, 2-video, 3-audio
 def mediaType(img_name):
     if any(word in img_name for word in image_formats):
         media_type = 1 # image 
@@ -188,15 +185,11 @@ def mediaType(img_name):
 
 #FAKE DATABSE!
 #This is here beacause I havent connected the website to the data base yet
-temp_submissions = []  #temp list to all quest submissions
 temp_groups = []    #temp list of all groups  
 temp_group = Groups("none", 0)#temp group fo testing
 temp_groups.append(temp_group)
 
-# post means user input
-# get means get from server
 
-# first thing after main
 #creates the website on localhost:5000
 @app.route('/', methods=['GET',"POST"])
 
@@ -221,7 +214,7 @@ def login():
         else:
             session["user"] = username
 
-            # Go to home page
+            # Go to home page first group is 0
             session.pop('_flashes',None)
             return redirect(url_for('home', group = 0))
         
@@ -233,29 +226,31 @@ def handleHome(request):
         "newSubmission": newSubmission,
         "viewSubmission": viewSubmission,
         "newQuest": createQuest,
-        "viewResults": viewResults
+        #"viewResults": viewResults #currently not implemented
     }
 
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "home":
+            print("PLEASE WORK")
+            print(request.form.get('group'))
             return functions[request.form.get('button')](request.form.get('group'), (request.form.get('task')))
 
 def newSubmission(group, task):
     #groups is hard coded in html since we cant switch groups yet
 
-    return redirect(url_for('upload', group = 0, task = task))
+    return redirect(url_for('upload', group = int(group), task = int(task)))
 
 def viewSubmission(group, task):
     
-    if len(temp_groups[0].tasks[int(task)].get("submissions")) == 0:
+    if len(temp_groups[int(group)].tasks[int(task)].get("submissions")) == 0:
         flash("No Submissions have be uploaded to that task yet")
         return
-    return redirect(url_for('watch', curr =0, group = 0, task = task,))
+    return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
 
 def createQuest(group, task):
     
-    return redirect(url_for('create', group = 0))
+    return redirect(url_for('create', group = int(group)))
     
 
 def handleSidebar(request):
@@ -274,6 +269,7 @@ def handleSidebar(request):
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "sidebar":
+            
             return functions[request.form.get('button')](request.form.get('value'))
     
 def acceptFriendRequest(arg):
@@ -316,6 +312,9 @@ def declineGroup(arg):
 def newGroup(arg):
     groupName = arg
     username = session["user"]
+    #creat a new group
+    group = Groups(username, len(temp_groups))
+    temp_groups.append(group)
     print("%s created group: %s" % (username, groupName))
     #database.newGroup(groupName, username)
     return
@@ -326,12 +325,13 @@ def logOut(arg):
     return redirect(url_for('login')) 
 
 def groupSelect(arg):
+    #prevent going out of bounds
     #nextGroup = arg
-    global currGroup
+    #global currGroup
     #print(currGroup)
-    currGroup = getGroup(arg)
-    print("Changed to group: %s" % (currGroup.get("name")))
-    return redirect(url_for('home'))
+    #currGroup = getGroup(arg)
+    #print("Changed to group: %s" % (currGroup.get("name")))
+    return redirect(url_for('home', group = arg))
 
 def getGroup(id):
     for group in groups:
@@ -345,36 +345,6 @@ def validateUser():
         return None
     else: return redirect(url_for('login'))         
 
-#creates the website on localhost:5000
-@app.route('/', methods=['GET',"POST"])
-
-#login page
-@app.route('/login', methods=['GET',"POST"])
-def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # Get the input from user
-        username = str(form.name.data)
-        password = str(form.password.data)
-
-        # Call to Database
-        user_id = database.login(username, password)
-
-        # User login failed
-        if(user_id == -1):
-            flash("The username or password you’ve entered is incorrect. Try again")
-            print("Fail")
-        
-        # User login success!
-        else:
-            session["user"] = username
-
-            # Go to home page
-            session.pop('_flashes',None)
-            return redirect(url_for('home'))
-        
-    # Close out of DB after using DB / webapp
-    return(render_template('login.html', form = form))
 
 #home page
 @app.route('/home/<group>', methods=['GET',"POST"])
@@ -398,7 +368,7 @@ def home(group):
 
     questExists = len(tasks)
     
-    return render_template('index.html', questExists = questExists, user = session["user"],  groups=groups, friends=friends, tasks=tasks, group = group)
+    return render_template('index.html', questExists = questExists, user = session["user"],  groups= temp_groups, friends=friends, tasks=tasks, group = str(group))
 
 
 #/create, collects text information to create a task
@@ -430,7 +400,7 @@ def create(group):
 
         # Get the input from user
         user = session["user"]
-        group = 'EVERYONE' # get the group -- need to find way to get the group name
+        #group = 'EVERYONE' # get the group -- need to find way to get the group name
 
     
         # Call to Database
