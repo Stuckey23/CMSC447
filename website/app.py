@@ -65,6 +65,9 @@ class QuestForm(FlaskForm):
     quest = StringField('quest', widget = TextArea(), validators=[DataRequired(), Length(max= 500)])
     rules = StringField('rules', widget = TextArea(), validators=[DataRequired(), Length(max= 500)])
 
+class NewGroupForm(FlaskForm):
+    groupName = StringField('groupName', widget = TextArea(), validators=[DataRequired(), Length(max= 20)])
+
 class CommentForm(FlaskForm):
     comment = StringField('comment', widget = TextArea(), validators=[Length(max= 500)])
 
@@ -95,6 +98,8 @@ class Groups():
         if(not os.path.exists(self.group_path)):
             os.mkdir(self.group_path)
 
+    def set_name(self, newName):
+        self.name = newName
 
     def add_task(self, quest, rules):
          submissions = []
@@ -254,14 +259,7 @@ def declineGroup(arg):
     return
 
 def newGroup(arg):
-    groupName = arg
-    username = session["user"]
-    #creat a new group
-    group = Groups(username, len(temp_groups))
-    temp_groups.append(group)
-    print("%s created group: %s" % (username, groupName))
-    #database.newGroup(groupName, username)
-    return
+    return redirect(url_for('groupCreation'))
 
 def logOut(arg):
     session.clear()
@@ -347,6 +345,21 @@ def home(group):
     
     return render_template('index.html', questExists = questExists, user = session["user"],  groups= temp_groups, friends=friends, tasks=tasks, group = getGroup(group))
 
+@app.route('/group_create', methods=['GET', 'Post'])
+def groupCreation():
+    form = NewGroupForm()
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        groupName = form.groupName.data # First grab the file
+        username = session["user"]
+        #creat a new group
+        group = Groups(username, len(temp_groups))
+        group.set_name(groupName)
+        temp_groups.append(group)
+        print("%s created group: %s" % (username, groupName))
+        return redirect(url_for('home', group = len(temp_groups) - 1))
+    return render_template("newGroup.html", form = form, groups=temp_groups, friends=friends)
+
 
 #/create, collects text information to create a task
 #returns the upload page after any text is sumbitted
@@ -385,7 +398,7 @@ def create(group):
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
-    return render_template("create.html", form = form, groups=groups, friends=friends)
+    return render_template("create.html", form = form, groups=temp_groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
@@ -427,7 +440,7 @@ def upload(group, task):
         #database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
-    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
+    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=temp_groups, friends=friends)
            
 
 #/watch/<curr> creates webpage to veiw the actual submissions, curr is the submission
@@ -523,7 +536,7 @@ def results(group, task):
             return redirect(url_for('home', group = 0))
 
     else: return redirect(url_for('login'))
-    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=groups, friends=friends)       
+    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=temp_groups, friends=friends)       
 
 
 
