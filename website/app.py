@@ -21,7 +21,7 @@ engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5433
 video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
-
+#test
 # Hard coded groups and friends. This eventually needs to come from the database
 groups = [
     {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
