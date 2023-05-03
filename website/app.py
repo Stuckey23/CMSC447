@@ -94,7 +94,8 @@ class Groups():
         #self.group_path = os.path.join(app.config['MEDIA_FOLDER'], str(id))
         if(not os.path.exists(self.group_path)):
             os.mkdir(self.group_path)
-        
+
+
     def add_task(self, quest, rules):
          submissions = []
          self.tasks.append({"id": len(self.tasks), "title": quest, "rules": rules, "submissions":submissions})
@@ -138,32 +139,6 @@ class Submission():
     def commnet(self, input):
         self.comments.append(input)
     
-# Hard coded groups and friends. This eventually needs to come from the database
-
-
-#tasks = [
-#    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
-#    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
-#]
-"""
-tasks = [
-    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
-    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
-]
-
-tempTasks2 = [
-    {"id": 0, "title": "Fake task 3", "rules": "3", "submissions":submissions},
-    {"id": 1, "title": "Fake task 4", "rules": "4", "submissions": submissions}
-]
-"""
-groups = [
-    """"
-    {"id": 0, "name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
-    {"id": 1, "name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
-    {"id": 2, "name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
-    {"id": 3, "name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
-    """
-]
 
 friends = [
     {"name": "ThwompFriend12", "isFriend": True},
@@ -189,37 +164,6 @@ temp_groups = []    #temp list of all groups
 temp_group = Groups("none", 0)#temp group fo testing
 temp_groups.append(temp_group)
 
-
-#creates the website on localhost:5000
-@app.route('/', methods=['GET',"POST"])
-
-#login page
-@app.route('/login', methods=['GET',"POST"])
-def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # Get the input from user
-        username = str(form.name.data)
-        password = str(form.password.data)
-
-        # Call to Database
-        user_id = database.login(username, password)
-
-        # User login failed
-        if(user_id == -1):
-            flash("The username or password you’ve entered is incorrect. Try again")
-            print("Fail")
-        
-        # User login success!
-        else:
-            session["user"] = username
-
-            # Go to home page first group is 0
-            session.pop('_flashes',None)
-            return redirect(url_for('home', group = 0))
-        
-    # Close out of DB after using DB / webapp
-    return(render_template('login.html', form = form))
 
 def handleHome(request):
     functions = {
@@ -250,7 +194,7 @@ def viewSubmission(group, task):
 
 def createQuest(group, task):
     
-    return redirect(url_for('create', group = int(group)))
+    return redirect(url_for('create', group = group))
     
 
 def handleSidebar(request):
@@ -334,8 +278,8 @@ def groupSelect(arg):
     return redirect(url_for('home', group = arg))
 
 def getGroup(id):
-    for group in groups:
-        if group.get("id") == int(id):
+    for group in temp_groups:
+        if group.id == int(id):
             return group
     return None
 
@@ -345,6 +289,36 @@ def validateUser():
         return None
     else: return redirect(url_for('login'))         
 
+#creates the website on localhost:5000
+@app.route('/', methods=['GET',"POST"])
+
+#login page
+@app.route('/login', methods=['GET',"POST"])
+def login():
+    form = LoginForm()
+    if request.method == "POST":
+        # Get the input from user
+        username = str(form.name.data)
+        password = str(form.password.data)
+
+        # Call to Database
+        user_id = database.login(username, password)
+
+        # User login failed
+        if(user_id == -1):
+            flash("The username or password you’ve entered is incorrect. Try again")
+            print("Fail")
+        
+        # User login success!
+        else:
+            session["user"] = username
+
+            # Go to home page first group is 0
+            session.pop('_flashes',None)
+            return redirect(url_for('home', group = 0))
+        
+    # Close out of DB after using DB / webapp
+    return(render_template('login.html', form = form))
 
 #home page
 @app.route('/home/<group>', methods=['GET',"POST"])
@@ -367,8 +341,11 @@ def home(group):
     tasks = temp_groups[group].tasks
 
     questExists = len(tasks)
+
+    theGroup = getGroup(group)
+    print(theGroup)
     
-    return render_template('index.html', questExists = questExists, user = session["user"],  groups= temp_groups, friends=friends, tasks=tasks, group = str(group))
+    return render_template('index.html', questExists = questExists, user = session["user"],  groups= temp_groups, friends=friends, tasks=tasks, group = getGroup(group))
 
 
 #/create, collects text information to create a task
