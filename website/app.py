@@ -68,6 +68,9 @@ class QuestForm(FlaskForm):
 class NewGroupForm(FlaskForm):
     groupName = StringField('groupName', widget = TextArea(), validators=[DataRequired(), Length(max= 20)])
 
+class NewFriendForm(FlaskForm):
+    friendName = StringField('friendName', widget = TextArea(), validators=[DataRequired(), Length(max= 20)])
+
 class CommentForm(FlaskForm):
     comment = StringField('comment', widget = TextArea(), validators=[Length(max= 500)])
 
@@ -235,10 +238,11 @@ def declineFriendRequest(arg):
     return
 
 def requestFriend(arg):
-    requesteeName = arg
-    requesterName = session["user"]
-    print("%s sent a friend requet to %s" % (requesterName, requesteeName))
-    #database.requestFriend(requesteeName, requesterName)
+    return redirect(url_for('addFriend'))
+    # requesteeName = arg
+    # requesterName = session["user"]
+    # print("%s sent a friend requet to %s" % (requesterName, requesteeName))
+    # #database.requestFriend(requesteeName, requesterName)
     return
 
 def removeFriend(arg):
@@ -359,6 +363,39 @@ def groupCreation():
         print("%s created group: %s" % (username, groupName))
         return redirect(url_for('home', group = len(temp_groups) - 1))
     return render_template("newGroup.html", form = form, groups=temp_groups, friends=friends)
+
+@app.route('/add_friend', methods=['GET', 'Post'])
+def addFriend():
+    form = NewFriendForm()
+    formType = request.form.get('formType')
+    if request.method == "POST" and formType != "sidebar":
+        username = session["user"]
+        friendName = form.friendName.data
+        friendID = database.findUser(friendName)
+        print(friendID)
+        if friendID == -1:
+            print("not found")
+            flash("That user doesn't exist! :()")
+        else:
+            #print(database.requestFriend(username, friendName))
+            #print(database.getRelationship(username, friendName))
+            
+            
+            return redirect(url_for('home', group = 0))
+        
+        
+        
+
+
+        # groupName = form.groupName.data # First grab the file
+        # username = session["user"]
+        # #creat a new group
+        # group = Groups(username, len(temp_groups))
+        # group.set_name(groupName)
+        # temp_groups.append(group)
+        # print("%s created group: %s" % (username, groupName))
+        
+    return render_template("newFriend.html", form = form, groups=temp_groups, friends=friends)
 
 
 #/create, collects text information to create a task

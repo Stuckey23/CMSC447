@@ -59,7 +59,7 @@ def requestFriend(userA, userB):
     userB = findUser(userB)
     
     # Make the Database Call
-    cur.execute("INSERT INTO public.relation(personA,personB,relationship,created_at) VALUES (%s, %s,%s, %s, %s)",[userA, userB, relation,curr_time])
+    cur.execute("INSERT INTO public.relation(personA,personB,relationship,created_at) VALUES (%s, %s,%s, %s)",[userA, userB, relation,curr_time])
     conn.commit()  
 
 def getRelationship(userA,userB):
