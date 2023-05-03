@@ -29,7 +29,11 @@
         {% for group in groups %}
             <div class="container" style="display: flex;">
                 <div style="flex-grow: 1;"> 
-                    {{group.name}}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.id}}">
+                        <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
+                    </form> 
                 </div>
                 <div style="flex-grow: 1;">
                     <!-- Has dot if there's a notification in that group. Replace * with small image -->
@@ -104,8 +108,9 @@
             <form action="#" method="post">
                 <input type="hidden" name="formType" value="sidebar">
                 <button type="submit" name="button" value="log-out">Log out</button>
-            </form> 
+            </form>
         </div>
+        <div>{{user}}</div> 
     </div>
 </body>
 </html>

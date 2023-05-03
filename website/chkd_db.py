@@ -19,10 +19,10 @@ def newUser():
     username = " "
     password = "abc123"
     # Make the Database Call
-    cur.execute("INSERT INTO public.user(full_name,username,password, created_at,updated_at) VALUES (%s, %s,'%s, %s, %s)",[full_name, username, password, curr_time,curr_time])
+    cur.execute("INSERT INTO public.user(full_name,username,password, created_at,updated_at) VALUES (%s, %s,%s, %s, %s)",[full_name, username, password, curr_time,curr_time])
     conn.commit()
 
-# Submit File
+# Submit Challenge
 def newChallenge(user, group, title, description):
     # Gets the user ID
     user_id = findUser(user)
@@ -30,19 +30,27 @@ def newChallenge(user, group, title, description):
     # Gets the group ID
     group_id = findGroup(group)
 
-    # Make the Database Call
-    cur.execute("INSERT INTO public.challenge(author, group, title, description, challenge_date) VALUES (%s, %s,'%s, %s, %s)",[user_id, group_id, title, description, curr_time])
-    conn.commit()    
-
+    if(group_id > 0 and user_id > 0):
+        # Make the Database Call
+        cur.execute("INSERT INTO public.challenge (author,description, group_id, challenge_date,title) \
+                    VALUES (%s, %s,%s, %s, %s)", [user_id, description, group_id, curr_time, title])
+        conn.commit()
 
 # Submit File
 def newPost(user, file, challenge_id):
     # Gets the user ID
     userId = findUser(user)
+    file = str(file)
 
-    # Make the Database Call
-    cur.execute("INSERT INTO public.post(author,challenge_id,submission,created_at,updated_at) VALUES (%s, %s,'%s, %s, %s)",[userId, challenge_id, file, curr_time,curr_time])
-    conn.commit()    
+    try:
+        # Make the Database Call
+        cur.execute("INSERT INTO public.post(author,challenge_id,submission,created_at,updated_at) VALUES (%s, %s,%s, %s, %s);",[userId, challenge_id, file, curr_time,curr_time])
+        conn.commit()    
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Failed to add post. Try again")
+        conn.rollback() 
 
 # Request a Friend
 def requestFriend(userA, userB):
@@ -51,7 +59,7 @@ def requestFriend(userA, userB):
     userB = findUser(userB)
     
     # Make the Database Call
-    cur.execute("INSERT INTO public.relation(personA,personB,relationship,created_at) VALUES (%s, %s,'%s, %s, %s)",[userA, userB, relation,curr_time])
+    cur.execute("INSERT INTO public.relation(personA,personB,relationship,created_at) VALUES (%s, %s,%s, %s, %s)",[userA, userB, relation,curr_time])
     conn.commit()  
 
 def getRelationship(userA,userB):
@@ -191,6 +199,94 @@ def findUser(username):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         print("The username search failed. Try again")
+        conn.rollback() 
+
+# Get Posts by user
+def GetPosts(username):
+    user_id = findUser(username)
+    user_posts = []
+
+    try:
+        cur.execute( "SELECT post_id FROM public.post WHERE user_id = %s", [user_id] )
+        results = cur.fetchall()
+        conn.commit()
+
+        # checks if user exists
+        if(results == None):
+            return
+        
+        for result in results:
+            user_posts.append(result[0])
+        
+        return user_posts
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Failed to generate feed. Try again")
+        conn.rollback() 
+
+# Get List of Friends
+def getFriends(username):
+    user_id = findUser(username)
+    friends = []
+
+    try:
+        cur.execute( "SELECT username \
+                    FROM public.relation AS user_relation, public.user as users \
+                    WHERE user_id = %s and \
+                    (user_id = person_a or user_id = person_b) and \
+                    relationship = 'FRIEND'", \
+                    [user_id] )
+        
+        results = cur.fetchall()
+        conn.commit()
+
+        # checks if friends exists
+        if(friends == None):
+          return
+        
+        # adds each username to friends list
+        for result in results:
+          friends.append(result[0])
+        
+        return friends
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Failed to get list of friends. Try again")
+        conn.rollback() 
+
+
+
+# Get List of Requests
+def getFriendRequests(username):
+    user_id = findUser(username)
+    requests = []
+
+    try:
+        cur.execute( "SELECT username \
+                    FROM public.relation AS user_relation, public.user as users \
+                    WHERE user_id = %s and \
+                    (user_id = person_a or user_id = person_b) and \
+                    relationship = 'REQUESTED'", \
+                    [user_id] )
+        
+        results = cur.fetchall()
+        conn.commit()
+
+        # checks if reqeusts exist
+        if(results == None):
+          return
+        
+        # adds each username to friends list
+        for result in results:
+          requests.append(result[0])
+        
+        return requests
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Failed to obtain list of friend requests. Try again")
         conn.rollback() 
 
 # Login via username and password

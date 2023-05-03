@@ -13,11 +13,10 @@
         </div>
         <div style="flex-grow: 1; background-color:#d9d9d9; border: 10px solid #262626; border-radius: 20px;" class="column right;">
             <h1 style="text-align:center">
-                Welcome to Quests:
-                <div>{{user}}</div>
+                {{currGroup.get("name")}} Quests: 
                 <form action="#" method="post">
                     <input type="hidden" name="formType" value="home">
-                    <input type="hidden" name="value" value={{currGroup}}>
+                    <input type="hidden" name="value" value={{currGroup.id}}>
                     <button type="submit" name="button" value="newQuest">Create New Quest</button>
                 </form> 
             </h1>
@@ -43,32 +42,48 @@
                 {% endwith %}
 
 
-                {% for task in tasks %}
-                    
-                        <div style="text-align:center"> 
-                            <h1>{{task.title}}</h1>
-                            <h3>{{task.rules}}</h3>
+            {% for task in tasks %}
+                
+                    <div style="text-align:center"> 
+                        <h1>{{task.title}}</h1>
+                        <h3>{{task.rules}}</h3>
+                    </div>
+                    <div class="container" style="display: flex;">
+                        <div style="flex-grow: 1;">
+                            <form action="#" method="post">
+                                <input type="hidden" name="formType" value="home">
+                                <input type="hidden" name="value" value="{{task.id}}">
+                                <button type="submit" name="button" value="newSubmission">Create New Submission</button>
+                                <button type="submit" name="button" value="viewSubmission">View Submissions</button>
+                                <button type="submit" name="button" value="viewResults">View Results</button>
+                            </form> 
                         </div>
+                    </div>
+                    {% for submission in task.submissions %}
+
+                        {{submission.filename}}
                         <div class="container" style="display: flex;">
                             <div style="flex-grow: 1;">
-                                <form action="#" method="post">
-                                    <p> {{task.id}}</p>
-                                    <input type="hidden" name="formType" value="home">
-                                    <input type="hidden" name="task" value="{{task.id}}">
-                                    <input type = "hidden" name ="group" value = "{{group}}">
-                                    <button type="submit" name="button" value="newSubmission">Create New Submission</button>
-                                    <button type="submit" name="button" value="viewSubmission">View Submissions</button>
-                                    
-                                    
-                                </form> 
-                            </div>
-                        </div>
+                            {% if submission.mediaType == 1: %}
                             
+                                <img src="{{url_for('static', filename=submission.filename)}}" width="320" height="240">
+                            
+                            {% elif submission.mediaType == 2: %}
+                                <video width="320" height="240" controls>
+                                    <source src="{{url_for('static', filename=submission.filename)}}">
+                                </video>
+                            {% elif submission.mediaType == 3: %}
+                                <audio controls>
+                                    <source src="{{url_for('static', filename=submission.filename)}}">
+                                </audio>
+                            {% else: %}
+                                <h1>Unsupported format</h1>
+                            {% endif %}
+                        </div>
+                        </div>
+                    {% endfor %}
             {% endfor %}
         </div>
-    </div>
-    
-    
-        
+    </div> 
 </body>
 </html>

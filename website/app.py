@@ -21,7 +21,24 @@ video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 
+# Hard coded groups and friends. This eventually needs to come from the database
+groups = [
+    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
+    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
+    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
+    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
+]
 
+        # ADD FRIENDS
+        # userA = session.get("user")
+        #result = database.addFriend(userA, userB)
+        #if result == 0:
+        #   flash("You already are friends with this user.")
+        #elif result == 1:
+        #   do something to update screen to reflect changes (add them to the list)
+        #   flash("You are now friends with this user.")
+        #else:
+        #   flash("Something went wrong.")
 
 #root of the website folder
 root_path = os.path.dirname(os.path.abspath(__file__))
@@ -109,17 +126,6 @@ class Submission():
         self.comments.append(input)
     
 # Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
-
-friends = [
-    {"name": "ThwompFriend12", "isFriend": True},
-    {"name": "ToothStealer", "isFriend": False}
-]
 
 # submissions = [
 #     {"user":"stuckey", "filename":"media/SS1.png", "mediaType": 1},
@@ -133,7 +139,39 @@ friends = [
 #    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
 #    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
 #]
+tasks = [
+    {"id": 0, "title": "Drop the ball from the furthest height", "rules": "Only 1 drop allowed", "submissions":submissions},
+    {"id": 1, "title": "Make the funniest face", "rules": "Must be your face", "submissions": submissions}
+]
 
+tempTasks2 = [
+    {"id": 0, "title": "Fake task 3", "rules": "3", "submissions":submissions},
+    {"id": 1, "title": "Fake task 4", "rules": "4", "submissions": submissions}
+]
+
+groups = [
+    {"id": 0, "name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True, "tasks": tasks},
+    {"id": 1, "name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True, "tasks": tempTasks2},
+    {"id": 2, "name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True, "tasks": tasks},
+    {"id": 3, "name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False, "tasks": tasks}
+]
+
+friends = [
+    {"name": "ThwompFriend12", "isFriend": True},
+    {"name": "ToothStealer", "isFriend": False}
+]
+
+
+
+
+#tasks = []
+
+
+
+#FAKE DATABSE!
+#This is here beacause I havent connected the website to the data base yet
+temp_submissions = []  #temp array to all quest submissions
+currGroup = groups[0]
 
 #mediaType(), given an image name checks what type of media was uploaded
 #returns an int 1-image, 2-video, 3-audio
@@ -194,7 +232,8 @@ def handleHome(request):
     functions = {
         "newSubmission": newSubmission,
         "viewSubmission": viewSubmission,
-        "newQuest": createQuest
+        "newQuest": createQuest,
+        "viewResults": viewResults
     }
 
     if request.method == "POST":
@@ -228,7 +267,8 @@ def handleSidebar(request):
         "acceptGroup": acceptGroup,
         "declineGroup": declineGroup,
         "newGroup": newGroup,
-        "log-out": logOut
+        "log-out": logOut,
+        "groupSelect": groupSelect
         }
     
     if request.method == "POST":
@@ -285,7 +325,19 @@ def logOut(arg):
     print("User logged out")
     return redirect(url_for('login')) 
 
+def groupSelect(arg):
+    #nextGroup = arg
+    global currGroup
+    #print(currGroup)
+    currGroup = getGroup(arg)
+    print("Changed to group: %s" % (currGroup.get("name")))
+    return redirect(url_for('home'))
 
+def getGroup(id):
+    for group in groups:
+        if group.get("id") == int(id):
+            return group
+    return None
 
 
 def validateUser():
@@ -293,6 +345,36 @@ def validateUser():
         return None
     else: return redirect(url_for('login'))         
 
+#creates the website on localhost:5000
+@app.route('/', methods=['GET',"POST"])
+
+#login page
+@app.route('/login', methods=['GET',"POST"])
+def login():
+    form = LoginForm()
+    if request.method == "POST":
+        # Get the input from user
+        username = str(form.name.data)
+        password = str(form.password.data)
+
+        # Call to Database
+        user_id = database.login(username, password)
+
+        # User login failed
+        if(user_id == -1):
+            flash("The username or password you’ve entered is incorrect. Try again")
+            print("Fail")
+        
+        # User login success!
+        else:
+            session["user"] = username
+
+            # Go to home page
+            session.pop('_flashes',None)
+            return redirect(url_for('home'))
+        
+    # Close out of DB after using DB / webapp
+    return(render_template('login.html', form = form))
 
 #home page
 @app.route('/home/<group>', methods=['GET',"POST"])
@@ -343,6 +425,18 @@ def create(group):
         #create new submission
         temp_groups[group].add_task(quest, rules)
         #tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
+        
+        # add quest to group here
+
+        # Get the input from user
+        user = session["user"]
+        group = 'EVERYONE' # get the group -- need to find way to get the group name
+
+    
+        # Call to Database
+        #database.newChallenge(user, group, quest, rules)
+        
+        #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
     return render_template("create.html", form = form, groups=groups, friends=friends)
 
@@ -376,7 +470,16 @@ def upload(group, task):
             #update the fake databse
             temp_groups[group].add_submission(sub)
             #temp_submissions.append(sub)
-            return redirect(url_for('watch', curr = 0, group = group, task = task))
+
+        # Update the Database
+        submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
+        user = session["user"]
+        challenge_id = 1
+
+        # Call to Database
+        #database.newPost(user, submissionFile, challenge_id)
+
+        return redirect(url_for('watch', curr = 0, group = group, task = task))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
@@ -444,7 +547,7 @@ def watch(curr, group, task):
             return  render_template('watch.html', user = user, filename = filename, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, comments = temp_groups[group].tasks[task].get("submissions")[curr].comments, form = form)
     
 
- #/results, webpage to veiw the top upvoted
+ #/results, webpage to view the top upvoted
  #this is not fully coded yet
 @app.route('/results/<group>/<task>', methods=['GET', 'POST'])
 def results(group, task):
