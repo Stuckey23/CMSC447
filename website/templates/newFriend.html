@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href='/static/home.css' />
+
+    <title>Group Creation</title>
+</head>
+<body>
+    <div class="container" style="display: flex;">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column left opacity;">
+            {% include "partials/sidebar.html" %}
+        </div>
+        <div style="flex-grow: 1;" class="column right;"">
+            <h1 style="text-align:center">Add a friend!</h1>
+            <h2 style="text-align:center">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class=flashes>
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="#">
+                {{ form.csrf_token }}
+                {{ form.friendName(size=10, placeholder = "Enter your friends name here", rows = 1, cols = 30, style="resize:none") }}
+                <div></div>
+                <input type="hidden" name="formType" value="group">
+                <button type="submit" name="button" value="newFriendSubmit">Send Friend Request</button>
+            </form>
+            </h2>
+        </div>
+</body>
+</html>
