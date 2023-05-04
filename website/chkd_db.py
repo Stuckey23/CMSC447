@@ -4,6 +4,9 @@ import pytz
 from sqlalchemy import DECIMAL         # time zone
 from decimal import Decimal
 
+import db_friends as friends
+import db_groups as groups
+
 # Connect to the CHKD Database
 curr_time = datetime.datetime.now(pytz.timezone('US/Eastern'))
 conn = psycopg2.connect(database="CHKD", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
@@ -52,55 +55,161 @@ def newPost(user, file, challenge_id):
         print("Failed to add post. Try again")
         conn.rollback() 
 
-# Request a Friend
-def requestFriend(userA, userB):
-    relation = "REQUESTED"
-    userA = findUser(userA)
-    userB = findUser(userB)
+# Request Member to Join Group
+def requestGroupMember(username, group_name):
+    # Get IDs
+    message = 'Request failed.'
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+
+    # User and Group Exist
+    if(user_id > 0 and group_id > 0):
+        relationship = groups.getGroupRelationship(user_id,group_id)
+
+        # Does not send request if user is already a member
+        if(relationship == 'MEMBER'):
+            message = 'User is already a member of this group.'
+
+        # Send request to database
+        elif relationship == None:
+            result = groups.requestUserToGroup(user_id,group_id,relationship)
+
+            if result == 'SUCCESS':
+                return 'You have successfully sent the request for the user to join ' + group_name
+
+    return message
     
-    # Make the Database Call
-    cur.execute("INSERT INTO public.relation(personA,personB,relationship,created_at) VALUES (%s, %s,%s, %s)",[userA, userB, relation,curr_time])
-    conn.commit()  
 
 def getRelationship(userA,userB):
-    userA = findUser(userA)
-    userB = findUser(userB)
+
+    if type == 'user':
+        userA = int(findUser(userA))
+        userB = int(findUser(userB))
 
     # Database Call
-    cur.execute("SELECT relationship FROM public.relation WHERE personA = %s and personB = %s", [userA,userB] )
+    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s", [userA, userB] )
     relationship = cur.fetchone()
     conn.commit()
 
-    return relationship
+    # checks if relationship exists
+    if(relationship):
+        relationship = relationship[0]
+        return relationship
+    
+    else:
+        return None      
+    
+# Accept Group Request
+def acceptGroupRequest(username, group_name):
+    # Get IDs
+    message = 'Request failed.'
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+
+    if(user_id > 0 and group_id > 0):
+        relationship = groups.getGroupRelationship(user_id,group_id)
+
+        # Does not send request if user is already member of group
+        if(relationship == 'MEMBER'):
+            message = 'You are already a member of this group.'
+
+        # Send request to database (User accepts)
+        else:
+            result = groups.acceptGroupRequest(user_id,group_id,relationship)
+
+            if result == 'SUCCESS':
+                return 'You have successfully joined ' + group_name
+
+    return message
+
+# Decline Group Request
+def declineGroup(username, group_name):
+
+    # Get IDs
+    message = 'Failed to leave ' + group_name
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+
+    # User and Group Exist
+    if(user_id > 0 and group_id > 0):
+        relationship = groups.getGroupRelationship(user_id,group_id)
+
+        if(relationship == 'MEMBER'):
+            result = groups.declineGroupRequest(user_id,group_id,relationship)
+
+            if result == 'SUCCESS':
+                return 'You have successfully left ' + group_name
+
+    return message
+
+# Request a Friend
+def requestFriend(userA, userB):
+    message = 'Failed to send request.'
+    userint_a = int(findUser(userA))
+    userint_b = int(findUser(userB))
+
+    # Check Users Exists // Prevent adding to table with non-existing users
+    if(userint_a > 0 and userint_b > 0):
+        result = friends.requestFriend(userA, userB)
+        if result == 'SUCCESS':
+            message = 'A request to ' + userB + ' has been sent.'
+    
+        else:
+            message = result
+
+    return message
+
+def getRelationship(userA,userB):
+    userA = int(findUser(userA))
+    userB = int(findUser(userB))
+
+    # Database Call
+    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s", [userA, userB] )
+    relationship = cur.fetchone()
+    conn.commit()
+
+    # checks if relationship exists
+    if(relationship):
+        relationship = relationship[0]
+        return relationship
+    
+    else:
+        return None
 
 # Add a Friend
 def addFriend(userA, userB):
-    userA = findUser(userA)
-    userB = findUser(userB)
+    return friends.addFriend(userA, userB)
+
+    
+
+# Decline Friend Request
+def declineFriend(userA, userB):
+
     relationship = getRelationship(userA,userB)
 
-    if relationship == 'FRIENDS':
-        return 0
-    
-    elif relationship == 'REQUESTED':
+    if relationship == 'REQUESTED':
         # Make the Database Call
-        cur.execute("UPDATE public.relation SET relationship='FRIENDS',created_at=%s WHERE userA=%s and userB=%s",[curr_time, userA, userB])
+        userA = int(findUser(userA))
+        userB = int(findUser(userB))
+        cur.execute("REMOVE FROM public.relation WHERE userA=%s and userB=%s",[userA, userB])
         conn.commit()    
-        return 1
+        return 'SUCCESS'
     
-    # Relationship DOES NOT exist
+    # Cannot Decline Friend Request
     else:
-        return -1
+        return 'FAILED'
 
-# Remove a Friend
+
+# Remove Existing Friend
 def removeFriend(userA, userB):
-    userA = findUser(userA)
-    userB = findUser(userB)
+
     relationship = getRelationship(userA,userB)
 
     if relationship == 'FRIENDS':
         # Make the Database Call
-        cur.execute("DELETE FROM public.relation WHERE userA=%s and userB=%s",[userA, userB])
+        userid_A = int(findUser(userA))
+        userid_B = int(findUser(userB))
+        cur.execute("DELETE FROM public.relation WHERE person_a=%s and person_b=%s",[userid_A, userid_B])
         conn.commit()    
         return True
     
@@ -110,7 +219,7 @@ def removeFriend(userA, userB):
 # Create a Comment
 def addComment(post, user, comment):
     # Gets the user ID
-    userId = findUser(user)
+    userId = int(findUser(user))
 
     # Make the Database Call
     cur.execute("INSERT INTO public.comment(post_id,commenter,message, created_at) VALUES (%s, %s, %s, %s)",[post, userId, comment, curr_time])
@@ -118,49 +227,65 @@ def addComment(post, user, comment):
 
 # Creates a new Group
 def newGroup(name, owner):
+    message = "Failed to create group"
+
     # Gets the user ID
-    userId = findUser(owner)
-    # Make the Database Call
-    cur.execute("INSERT INTO public.group(group_name,owner, created_at,updated_at) VALUES (%s, %s, %s, %s)",[name, userId, curr_time,curr_time])
+    userId = int(findUser(owner))
+    if(userId < 0):
+        return "Error in getting user"
 
-    # Adds owner to the group
-    groupId = findGroup(name)
-    addUserToGroup(userId, groupId)
-    conn.commit()
+    # Gets the group id
+    groupId = int(findGroup(name))
+    if(groupId > 0):
+        return "This group name is already taken."
+    
+    # Creates new Group
+    result = groups.newGroup(userId, name)
 
-def addUserToGroup(user, groupName):
-    # Gets the user ID and group ID
-    userId = findUser(user)
-    groupId = findGroup(groupName)
-    # Call Database
-    cur.execute("INSERT INTO public.user_list(group_id,user_id) VALUES (%s, %s)",[int(groupId), int(userId)])
-    conn.commit()
+    return result
+
+# User JOINS the group
+def addUserToGroup(username, group_name):  
+    message = "Failed to join group"
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+    if(user_id > 0 and group_id > 0):
+        result = groups.addUserToGroup(user_id, group_id)
+        if result == 'SUCCESS':
+            message = "You have successfully joined the group"
+
+# User LEAVES the group
+def removeUserFromGroup(username, group_name):  
+    message = "Failed to leave group" 
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+    
+    if(user_id > 0 and group_id > 0):
+        result =   groups.removeUserFromGroup(user_id, group_id)
+        if result == 'SUCCESS':
+            message = "You have successfully left the group"
+
+    return message
+
+# Request User to Join Group
+def requestUserToGroup(username, group_name):   
+    message = "Failed to request user to join group"
+    user_id = int(findUser(username))
+    group_id = int(findGroup(group_name))
+
+    if(user_id > 0 and group_id > 0):
+        result =  groups.requestUserToGroup(user_id, group_id)
+        if result == 'SUCCESS':
+            message = "You have successfully left the group"
+
+    return message
 
 # Lists all group names the user belongs to
-def getGroupNamesOfUser(user):
-    userId = findUser(user)
-    groups = []
-    try:
-        cur.execute( "SELECT group_name \
-                    FROM public.group AS user_group \
-                    INNER JOIN public.user_list AS user_list \
-                    ON user_group.group_id = user_list.group_id \
-                    WHERE user_list.user_id = %s", [int(userId)] )
-        rows = cur.fetchall()
-
-        # Store Results
-        for row in rows:
-            group_name = row[0]
-            groups.append(group_name)
-
-        conn.commit()
-        return groups
-
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        print("Cannot display groups. Try again")
-        conn.rollback() 
-
+def getGroupNamesOfUser(username):
+    user_id = int(findUser(username))
+    if(user_id > 0):
+        groups = groups.getGroupNamesOfUser(user_id)
+    
 # Look for group via name
 def findGroup(groupName):
     try:
@@ -203,7 +328,7 @@ def findUser(username):
 
 # Get Posts by user
 def GetPosts(username):
-    user_id = findUser(username)
+    user_id = int(findUser(username))
     user_posts = []
 
     try:

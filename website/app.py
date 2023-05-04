@@ -356,12 +356,23 @@ def groupCreation():
     if request.method == "POST" and formType != "sidebar":
         groupName = form.groupName.data # First grab the file
         username = session["user"]
-        #creat a new group
-        group = Groups(username, len(temp_groups))
-        group.set_name(groupName)
-        temp_groups.append(group)
-        print("%s created group: %s" % (username, groupName))
-        return redirect(url_for('home', group = len(temp_groups) - 1))
+
+        # Creates a new group
+        result = database.newGroup(groupName, username)
+
+        if(result == 'SUCCESS'):
+            group = Groups(username, len(temp_groups))
+            group.set_name(groupName)
+            temp_groups.append(group)
+
+            print("%s created group: %s" % (username, groupName))
+            return redirect(url_for('home', group = len(temp_groups) - 1))
+        
+        # Group name taken
+        else:
+            flash(result)
+            # Need to return to previous page but flash the message somehow.
+        
     return render_template("newGroup.html", form = form, groups=temp_groups, friends=friends)
 
 @app.route('/add_friend', methods=['GET', 'Post'])
@@ -369,21 +380,31 @@ def addFriend():
     form = NewFriendForm()
     formType = request.form.get('formType')
     if request.method == "POST" and formType != "sidebar":
+        
+        # Get usernames
         username = session["user"]
         friendName = form.friendName.data
-        friendID = database.findUser(friendName)
-        print(friendID)
-        if friendID == -1:
-            print("not found")
-            flash("That user doesn't exist! :()")
+
+        # Check if trying to add self
+        if friendName == username:
+            flash("Hey! You cannot add your self!")
+
+        # Check if user exists
         else:
-            #print(database.requestFriend(username, friendName))
-            #print(database.getRelationship(username, friendName))
+            friendID = database.findUser(friendName)
+            print(friendID)
             
+            # User does not exist
+            if friendID == -1:
+                print("not found")
+                flash("That user doesn't exist! :()")
+        
+            # Send the request
+            else:
+                result = database.requestFriend(username, friendName)
+                flash(result)
             
-            return redirect(url_for('home', group = 0))
-        
-        
+        return redirect(url_for('home', group = 0))
         
 
 
@@ -574,8 +595,6 @@ def results(group, task):
 
     else: return redirect(url_for('login'))
     return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=temp_groups, friends=friends)       
-
-
 
 if __name__ == '__main__':
     #Uncomment if you want everyone on your local network to connect!
