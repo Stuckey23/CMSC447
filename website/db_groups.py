@@ -84,7 +84,7 @@ def removeUserFromGroup(userId, groupId):
     return 'SUCCESS'
 
 def addOwnerToGroup(userId, groupId):  
-    relation = 'MEMBER' 
+    relation = 'OWNER' 
     # Call Database
     cur.execute("INSERT INTO public.user_list(group_id,user_id,group_relation) VALUES (%s, %s,%s)",[groupId,userId, relation])
     conn.commit()
@@ -146,6 +146,7 @@ def deleteGroupExistence(userId, groupId):
 
     # Check if user is the OWNER
     owner = getGroupOwner(groupId)
+    print("owner", owner)
 
     if(owner == userId):
         # Delete Members from Group and then actual group

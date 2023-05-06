@@ -1,11 +1,11 @@
+import db_friends as friends
+import db_groups as groups
+
 import psycopg2     # db library
 import datetime     # time zone
 import pytz
 from sqlalchemy import DECIMAL         # time zone
 from decimal import Decimal
-
-import db_friends as friends
-import db_groups as groups
 
 # Connect to the CHKD Database
 curr_time = datetime.datetime.now(pytz.timezone('US/Eastern'))
@@ -267,6 +267,27 @@ def removeUserFromGroup(username, group_name):
 
     return message
 
+def deleteGroupExistence(username, group_name):
+    message = "Failed to delete group"
+
+    # Gets the user ID
+    userId = int(findUser(username))
+    if(userId < 0):
+        return "Error in getting user"
+
+    # Gets the group id
+    groupId = int(findGroup(group_name))
+    if(groupId < 0):
+        return "Error in getting group"
+    
+    # Deletes group
+    result = groups.deleteGroupExistence(userId, groupId)
+    if result == "SUCCESS":
+        print("deleted group ", group_name)
+
+    return result
+
+
 # Request User to Join Group
 def requestUserToGroup(username, group_name):   
     message = "Failed to request user to join group"
@@ -284,7 +305,7 @@ def requestUserToGroup(username, group_name):
 def getGroupNamesOfUser(username):
     user_id = int(findUser(username))
     if(user_id > 0):
-        groups = groups.getGroupNamesOfUser(user_id)
+        return groups.getGroupNamesOfUser(user_id)
     
 # Look for group via name
 def findGroup(groupName):

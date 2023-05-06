@@ -42,7 +42,35 @@
                         <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
                     </form> 
                 </div>
-                <div style="flex-grow: 1; float: right;">
+                <div style="flex-grow: 1; line-height: 1.3;">
+                    <!-- Checks friend status to decide which to show -->
+                    {% if group.memberStatus == "OWNER" %}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.name}}">
+                        <button type="submit" name="button" value="deleteGroup" style="float: right; margin-bottom: 5px;">
+                            Delete Group
+                        </button>
+                    </form> 
+                    {% endif %}
+
+                    {% if group.memberStatus == "PENDING" %}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.id}}">
+                        <button type="submit" name="button" value="acceptGroup" style="float: right; margin-left: 5px;">
+                            Accept
+                        </button>
+                        <button type="submit" name="button" value="declineGroup" style="float: right;">
+                            Decline
+                        </button>
+                    </form> 
+                    {%endif%}
+                </div>
+                <!-- <div style="flex-grow: 1; float: right;"> -->
+
+                    <!-- Commented out text -->
+                    {#
                     <!-- Has dot if there's a notification in that group. Replace * with small image -->
                     {% if group.hasNotification %}
                         *
@@ -53,7 +81,9 @@
 
                     <!-- Needs member icon after this -->
                     {{group.totalMembers}}
-                </div>
+                    #}
+
+                <!-- </div> -->
             </div>
         {% endfor %}
     </div>

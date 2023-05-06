@@ -23,12 +23,7 @@ image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image format
 audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 #testing
 # Hard coded groups and friends. This eventually needs to come from the database
-groups = [
-    {"name": "The Blue Boys", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": True},
-    {"name": "The Whalers", "hasNotification": True, "completedTasks": 1, "totalTasks": 3, "totalMembers": 12, "isMember": True},
-    {"name": "Team 3: Best!", "hasNotification": False, "completedTasks": 11, "totalTasks": 12, "totalMembers": 3, "isMember": True},
-    {"name": "Gang X", "hasNotification": False, "completedTasks": 2, "totalTasks": 5, "totalMembers": 6, "isMember": False}
-]
+groups = []
 
         # ADD FRIENDS
         # userA = session.get("user")
@@ -95,6 +90,7 @@ class Groups():
         self.id = id       #group id
         self.name = "group" + str(id) 
         self.tasks = []    #lists of all tasks 
+        self.memberStatus = "OWNER"
         #creates group folder nside of media
         self.group_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(id)))
         #self.group_path = os.path.join(app.config['MEDIA_FOLDER'], str(id))
@@ -104,13 +100,21 @@ class Groups():
     def set_name(self, newName):
         self.name = newName
 
+    def set_tasks(self, tasks):
+        self.tasks = tasks
+
+    def toDictionary(self):
+        dict = {"id": self.id, "name": self.name, "tasks": self.tasks, "obj": self, "memberStatus": self.memberStatus}
+        return dict
+    
     def add_task(self, quest, rules):
-         submissions = []
-         self.tasks.append({"id": len(self.tasks), "title": quest, "rules": rules, "submissions":submissions})
-         #creates task folder inside of group folder
-         task_path = os.path.join(self.group_path, str(len(self.tasks) -1))
-         if(not os.path.exists(task_path)):
-            os.mkdir(task_path)
+        submissions = []
+        self.tasks.append({"id": len(self.tasks), "title": quest, "rules": rules, "submissions":submissions})
+        #creates task folder inside of group folder
+        task_path = os.path.join(self.group_path, str(len(self.tasks) -1))
+        if(not os.path.exists(task_path)):
+           os.mkdir(task_path)
+        return True
 
     def add_submission(self, submission):
         #get the right task folder
@@ -195,7 +199,7 @@ def newSubmission(group, task):
 
 def viewSubmission(group, task):
     
-    if len(temp_groups[int(group)].tasks[int(task)].get("submissions")) == 0:
+    if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
         flash("No Submissions have be uploaded to that task yet")
         return
     return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
@@ -214,6 +218,7 @@ def handleSidebar(request):
         "acceptGroup": acceptGroup,
         "declineGroup": declineGroup,
         "newGroup": newGroup,
+        "deleteGroup": deleteGroup,
         "log-out": logOut,
         "groupSelect": groupSelect
         }
@@ -234,6 +239,7 @@ def acceptFriendRequest(arg):
 def declineFriendRequest(arg):
     friendName = arg
     username = session["user"]
+    database.declineFriend(username, friendName)
     print("%s declined %s's friend request" % (username, friendName))
     return
 
@@ -265,22 +271,21 @@ def declineGroup(arg):
 def newGroup(arg):
     return redirect(url_for('groupCreation'))
 
+def deleteGroup(arg):
+    username = session["user"]
+    groupName = arg
+    print("res", database.deleteGroupExistence(username, groupName))
+
 def logOut(arg):
     session.clear()
     print("User logged out")
     return redirect(url_for('login')) 
 
 def groupSelect(arg):
-    #prevent going out of bounds
-    #nextGroup = arg
-    #global currGroup
-    #print(currGroup)
-    #currGroup = getGroup(arg)
-    #print("Changed to group: %s" % (currGroup.get("name")))
     return redirect(url_for('home', group = arg))
 
 def getGroup(id):
-    for group in temp_groups:
+    for group in groups:
         if group.id == int(id):
             return group
     return None
@@ -289,7 +294,48 @@ def getGroup(id):
 def validateUser():
     if "user" in session:
         return None
-    else: return redirect(url_for('login'))         
+    else: return redirect(url_for('login'))    
+
+def formGroupsFromDB(username):
+    groupNames = database.getGroupNamesOfUser(username)
+    groups.clear()
+    for name in groupNames:
+        newGroup = Groups("None", len(groups))
+        newGroup.set_name(name)
+        # eventually pull tasks from database
+        newGroup.set_tasks([])
+        #newGroup = newGroup.toDictionary()
+        #newGroup.set_tasks()
+        groups.append(newGroup)
+        print("adding group! %s" % newGroup.name)
+
+    print(groups)
+    return groups     
+
+def formFriendsFromDB(username):
+    friendNames = database.getFriends(username)
+    friends.clear()
+    for name in friendNames:
+        friends.append({
+            "name": name,
+            "isFriend": True
+        })
+
+    pendingNames = database.getFriendRequests(username)
+    for name in pendingNames:
+        print("appending ", name)
+        friends.append({
+            "name": name,
+            "isFriend": False
+        })
+    
+        
+        #print("friend! %s" % frinewGroup.get("name"))
+
+    #print(groups)
+    #print("testing ", database.findUser("erinm5"))
+    print("testing ", database.getFriendRequests(username))
+    return friends
 
 #creates the website on localhost:5000
 @app.route('/', methods=['GET',"POST"])
@@ -325,6 +371,14 @@ def login():
 #home page
 @app.route('/home/<group>', methods=['GET',"POST"])
 def home(group):
+    user = session["user"]
+    # Gets a list of groups a user is in
+    groups = formGroupsFromDB(user)
+    friends = formFriendsFromDB(user)
+
+    print("g1", groups)
+
+
     group = int(group)
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
@@ -340,17 +394,32 @@ def home(group):
     if results != None:
         return results
     
-    tasks = temp_groups[group].tasks
-
-    questExists = len(tasks)
-
     theGroup = getGroup(group)
-    print(theGroup)
     
-    return render_template('index.html', questExists = questExists, user = session["user"],  groups= temp_groups, friends=friends, tasks=tasks, group = getGroup(group))
+    tasks = theGroup.tasks
+    print("tasks ", tasks)
+    questExists = len(tasks)
+    
+    return render_template('index.html', questExists = questExists, user = user,  groups= groups, friends=friends, tasks=tasks, group = getGroup(group))
 
-@app.route('/group_create', methods=['GET', 'Post'])
+@app.route('/group_create', methods=['GET', 'POST'])
 def groupCreation():
+    user = session["user"]
+    # Gets a list of groups a user is in
+    groups = formGroupsFromDB(user)
+    friends = formFriendsFromDB(user)
+
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
+
     form = NewGroupForm()
     formType = request.form.get('formType')
     if request.method == "POST" and formType != "sidebar":
@@ -361,22 +430,37 @@ def groupCreation():
         result = database.newGroup(groupName, username)
 
         if(result == 'SUCCESS'):
-            group = Groups(username, len(temp_groups))
+            group = Groups(username, len(groups))
             group.set_name(groupName)
-            temp_groups.append(group)
+            groups.append(group)
 
             print("%s created group: %s" % (username, groupName))
-            return redirect(url_for('home', group = len(temp_groups) - 1))
+            return redirect(url_for('home', group = len(groups) - 1))
         
         # Group name taken
         else:
             flash(result)
             # Need to return to previous page but flash the message somehow.
         
-    return render_template("newGroup.html", form = form, groups=temp_groups, friends=friends)
+    return render_template("newGroup.html", form = form, user = user, groups=groups, friends=friends)
 
-@app.route('/add_friend', methods=['GET', 'Post'])
+@app.route('/add_friend', methods=['GET', 'POST'])
 def addFriend():
+    user = session["user"]
+    # Gets a list of groups a user is in
+    groups = formGroupsFromDB(user)
+    friends = formFriendsFromDB(user)
+
+    #check that the user actually sigined in and didn't manually type the url
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
+    
     form = NewFriendForm()
     formType = request.form.get('formType')
     if request.method == "POST" and formType != "sidebar":
@@ -403,8 +487,9 @@ def addFriend():
             else:
                 result = database.requestFriend(username, friendName)
                 flash(result)
+                return redirect(url_for('home', group = 0))
             
-        return redirect(url_for('home', group = 0))
+        
         
 
 
@@ -416,7 +501,7 @@ def addFriend():
         # temp_groups.append(group)
         # print("%s created group: %s" % (username, groupName))
         
-    return render_template("newFriend.html", form = form, groups=temp_groups, friends=friends)
+    return render_template("newFriend.html", form = form, groups=groups, friends=friends)
 
 
 #/create, collects text information to create a task
@@ -441,7 +526,11 @@ def create(group):
         quest = form.quest.data # First grab the file
         rules = form.rules.data
         #create new submission
-        temp_groups[group].add_task(quest, rules)
+        #print("herezzz ", groups[group].add_task(quest, rules))
+        #uncomment
+        groups[group].add_task(quest, rules)
+
+
         #tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
         
         # add quest to group here
@@ -456,7 +545,7 @@ def create(group):
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
-    return render_template("create.html", form = form, groups=temp_groups, friends=friends)
+    return render_template("create.html", form = form, groups=groups, friends=friends)
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
@@ -498,7 +587,7 @@ def upload(group, task):
         #database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
-    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=temp_groups, friends=friends)
+    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
            
 
 #/watch/<curr> creates webpage to veiw the actual submissions, curr is the submission
@@ -569,32 +658,33 @@ def watch(curr, group, task):
  #this is not fully coded yet
 @app.route('/results/<group>/<task>', methods=['GET', 'POST'])
 def results(group, task):
-    group = int(group)
-    task = int(task)
-    if "user" in session:
-        unsorted = []
-        winner_index = 0
-        #This is a really bad way to get the top voted
-        folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER'])))
-        print("This is the current "+ str(folder_len))
-        for votes in range(folder_len):
-            unsorted.append((temp_submissions[votes].votes))
-        num_votes  = max(unsorted)
+    pass
+    # group = int(group)
+    # task = int(task)
+    # if "user" in session:
+    #     unsorted = []
+    #     winner_index = 0
+    #     #This is a really bad way to get the top voted
+    #     folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER'])))
+    #     print("This is the current "+ str(folder_len))
+    #     for votes in range(folder_len):
+    #         unsorted.append((temp_submissions[votes].votes))
+    #     num_votes  = max(unsorted)
 
-        for votes in range(folder_len):
-            if temp_submissions[votes].votes == num_votes:
-                winner_index = votes
+    #     for votes in range(folder_len):
+    #         if temp_submissions[votes].votes == num_votes:
+    #             winner_index = votes
 
-        user_name = temp_submissions[winner_index].user
-        file_name = temp_submissions[winner_index].file
-        img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[winner_index]
-        print(img_name)
-        print(winner_index)
-        if request.method == "POST":
-            return redirect(url_for('home', group = 0))
+    #     user_name = temp_submissions[winner_index].user
+    #     file_name = temp_submissions[winner_index].file
+    #     img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[winner_index]
+    #     print(img_name)
+    #     print(winner_index)
+    #     if request.method == "POST":
+    #         return redirect(url_for('home', group = 0))
 
-    else: return redirect(url_for('login'))
-    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=temp_groups, friends=friends)       
+    # else: return redirect(url_for('login'))
+    # return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=temp_groups, friends=friends)       
 
 if __name__ == '__main__':
     #Uncomment if you want everyone on your local network to connect!
