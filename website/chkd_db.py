@@ -87,7 +87,9 @@ def getRelationship(userA,userB):
         userB = int(findUser(userB))
 
     # Database Call
-    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s", [userA, userB] )
+    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s \
+                UNION \
+                SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s", [userA, userB, userB, userA] )
     relationship = cur.fetchone()
     conn.commit()
 
@@ -145,8 +147,8 @@ def declineGroup(username, group_name):
 # Request a Friend
 def requestFriend(userA, userB):
     message = 'Failed to send request.'
-    userint_a = int(findUser(userA))
-    userint_b = int(findUser(userB))
+    userint_a = int(findUser(userA)) # requester
+    userint_b = int(findUser(userB)) # requestee
 
     # Check Users Exists // Prevent adding to table with non-existing users
     if(userint_a > 0 and userint_b > 0):
@@ -164,7 +166,7 @@ def getRelationship(userA,userB):
     userB = int(findUser(userB))
 
     # Database Call
-    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s", [userA, userB] )
+    cur.execute("SELECT relationship FROM public.relation WHERE person_a = %s and person_b = %s or person_a = %s and person_b = %s", [userA, userB, userB, userA] )
     relationship = cur.fetchone()
     conn.commit()
 
@@ -191,7 +193,8 @@ def declineFriend(userA, userB):
         # Make the Database Call
         userA = int(findUser(userA))
         userB = int(findUser(userB))
-        cur.execute("REMOVE FROM public.relation WHERE userA=%s and userB=%s",[userA, userB])
+        #cur.execute("DELETE FROM public.relation WHERE p=%s and userB=%s",[userA, userB])
+        cur.execute("DELETE FROM public.relation WHERE (person_a=%s and person_B=%s) or (person_A=%s and person_B=%s)",[userA, userB, userB, userA])
         conn.commit()    
         return 'SUCCESS'
     
@@ -204,17 +207,19 @@ def declineFriend(userA, userB):
 def removeFriend(userA, userB):
 
     relationship = getRelationship(userA,userB)
-
-    if relationship == 'FRIENDS':
+    print("relation %s" % relationship)
+    if relationship == 'FRIEND':
         # Make the Database Call
         userid_A = int(findUser(userA))
         userid_B = int(findUser(userB))
-        cur.execute("DELETE FROM public.relation WHERE person_a=%s and person_b=%s",[userid_A, userid_B])
+        #print("Removing: %i and %i" % userid_A, userid_B)
+        cur.execute("DELETE FROM public.relation WHERE (person_a=%s and person_b=%s) or (person_a=%s and person_b=%s)",[userid_A, userid_B, userid_B, userid_A])
         conn.commit()   
         
         return True
     
     else:
+        print("not friends!")
         return False
 
 # Create a Comment
@@ -383,7 +388,7 @@ def getFriends(username):
                     WHERE f.person_b = %s and f.relationship = 'FRIEND' \
                     union \
                     SELECT username from public.user u \
-                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    INNER JOIN public.relation f on f.person_b = u.user_id \
                     WHERE f.person_a = %s and f.relationship = 'FRIEND'",
                     [user_id,user_id] )
         
@@ -414,12 +419,8 @@ def getFriendRequests(username):
     try:
         cur.execute("SELECT username from public.user u \
                     INNER JOIN public.relation f on f.person_a = u.user_id \
-                    WHERE f.person_b = %s and f.relationship = 'REQUESTED'\
-                    union \
-                    SELECT username from public.user u \
-                    INNER JOIN public.relation f on f.person_a = u.user_id \
-                    WHERE f.person_a = %s and f.relationship = 'REQUESTED'",
-                    [user_id,user_id])
+                    WHERE f.person_b = %s and f.relationship = 'REQUESTED'",
+                    [user_id])
         results = cur.fetchall()
         conn.commit()
 

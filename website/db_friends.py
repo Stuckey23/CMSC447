@@ -20,14 +20,14 @@ def addFriend(userA, userB):
 
     relationship = db.getRelationship(userA,userB)
 
-    if relationship == 'FRIENDS':
+    if relationship == 'FRIEND':
         return 'You are already friends with this user.'
     
     elif relationship == 'REQUESTED':
         # Make the Database Calls
         userid_A = int(db.findUser(userA))
         userid_B = int(db.findUser(userB))
-        cur.execute("UPDATE public.relation SET relationship='FRIENDS',created_at=%s WHERE userA=%s and userB=%s",[curr_time, userid_A, userid_B])
+        cur.execute("UPDATE public.relation SET relationship='FRIEND',created_at=%s WHERE person_a=%s and person_b=%s",[curr_time, userid_A, userid_B])
         conn.commit()    
         return 'You have successfully added ' + userB
     
@@ -51,7 +51,7 @@ def requestFriend(userA, userB):
 
         return 'SUCCESS'   
 
-    elif relationship == 'FRIENDS': 
+    elif relationship == 'FRIEND': 
         return 'You already are friends with this user.'
 
     elif relationship == 'REQUESTED':

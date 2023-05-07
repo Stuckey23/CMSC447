@@ -233,15 +233,15 @@ def acceptFriendRequest(arg):
     friendName = arg
     username = session["user"]
     print("%s accepted %s's friend request" % (username, friendName))
-    #database.addFriend(friendName, username)
-    return
+    database.addFriend(friendName, username)
+    return redirect(url_for('home', group = 0))
 
 def declineFriendRequest(arg):
     friendName = arg
     username = session["user"]
     database.declineFriend(username, friendName)
     print("%s declined %s's friend request" % (username, friendName))
-    return
+    return redirect(url_for('home', group = 0))
 
 def requestFriend(arg):
     return redirect(url_for('addFriend'))
@@ -255,15 +255,15 @@ def removeFriend(arg):
     userA = session["user"]
     userB = arg
     print("%s removed %s as a friend" % (userA, userB))
-    #database.removeFriend(userA, userB)
-    return
+    database.removeFriend(userA, userB)
+    return redirect(url_for('home', group = 0))
 
 def acceptGroup(arg):
     username = session["user"]
     groupName = arg
     print("%s joined the group: %s" % (username, groupName))
     #database.addUserToGroup(username, groupName)
-    return
+    return redirect(url_for('home', group = 0))
 
 def declineGroup(arg):
     return
