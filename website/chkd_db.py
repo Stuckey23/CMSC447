@@ -210,7 +210,8 @@ def removeFriend(userA, userB):
         userid_A = int(findUser(userA))
         userid_B = int(findUser(userB))
         cur.execute("DELETE FROM public.relation WHERE person_a=%s and person_b=%s",[userid_A, userid_B])
-        conn.commit()    
+        conn.commit()   
+        
         return True
     
     else:
@@ -377,12 +378,14 @@ def getFriends(username):
     friends = []
 
     try:
-        cur.execute( "SELECT username \
-                    FROM public.relation AS user_relation, public.user as users \
-                    WHERE user_id = %s and \
-                    (user_id = person_a or user_id = person_b) and \
-                    relationship = 'FRIEND'", \
-                    [user_id] )
+        cur.execute("SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_b = %s and f.relationship = 'FRIEND' \
+                    union \
+                    SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_a = %s and f.relationship = 'FRIEND'",
+                    [user_id,user_id] )
         
         results = cur.fetchall()
         conn.commit()
@@ -403,24 +406,24 @@ def getFriends(username):
         conn.rollback() 
 
 
-
 # Get List of Requests
 def getFriendRequests(username):
     user_id = findUser(username)
     requests = []
 
     try:
-        cur.execute( "SELECT username \
-                    FROM public.relation AS user_relation, public.user as users \
-                    WHERE user_id = %s and \
-                    (user_id = person_a or user_id = person_b) and \
-                    relationship = 'REQUESTED'", \
-                    [user_id] )
-        
+        cur.execute("SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_b = %s and f.relationship = 'REQUESTED'\
+                    union \
+                    SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_a = %s and f.relationship = 'REQUESTED'",
+                    [user_id,user_id])
         results = cur.fetchall()
         conn.commit()
 
-        # checks if reqeusts exist
+        # checks if requests exist
         if(results == None):
           return
         
