@@ -188,8 +188,8 @@ def handleHome(request):
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "home":
-            print("PLEASE WORK")
-            print(request.form.get('group'))
+            #print("PLEASE WORK")
+            #print(request.form.get('group'))
             return functions[request.form.get('button')](request.form.get('group'), (request.form.get('task')))
 
 def newSubmission(group, task):
@@ -274,7 +274,10 @@ def newGroup(arg):
 def deleteGroup(arg):
     username = session["user"]
     groupName = arg
-    print("res", database.deleteGroupExistence(username, groupName))
+    database.deleteGroupExistence(username, groupName)
+    return redirect(url_for('home', group = 0))
+    #print("res", database.deleteGroupExistence(username, groupName))
+    
 
 def logOut(arg):
     session.clear()
@@ -298,6 +301,7 @@ def validateUser():
 
 def formGroupsFromDB(username):
     groupNames = database.getGroupNamesOfUser(username)
+    print("%s has groups %s" % (username, groupNames))
     groups.clear()
     for name in groupNames:
         newGroup = Groups("None", len(groups))
@@ -309,7 +313,7 @@ def formGroupsFromDB(username):
         groups.append(newGroup)
         print("adding group! %s" % newGroup.name)
 
-    print(groups)
+    #print(groups)
     return groups     
 
 def formFriendsFromDB(username):
@@ -323,7 +327,7 @@ def formFriendsFromDB(username):
 
     pendingNames = database.getFriendRequests(username)
     for name in pendingNames:
-        print("appending ", name)
+        #print("appending ", name)
         friends.append({
             "name": name,
             "isFriend": False
@@ -334,7 +338,7 @@ def formFriendsFromDB(username):
 
     #print(groups)
     #print("testing ", database.findUser("erinm5"))
-    print("testing ", database.getFriendRequests(username))
+    #print("testing ", database.getFriendRequests(username))
     return friends
 
 #creates the website on localhost:5000
@@ -376,7 +380,7 @@ def home(group):
     groups = formGroupsFromDB(user)
     friends = formFriendsFromDB(user)
 
-    print("g1", groups)
+    #print("g1", groups)
 
 
     group = int(group)
@@ -396,8 +400,9 @@ def home(group):
     
     theGroup = getGroup(group)
     
-    tasks = theGroup.tasks
-    print("tasks ", tasks)
+    tasks = []
+    #tasks = theGroup.tasks
+    #print("tasks ", tasks)
     questExists = len(tasks)
     
     return render_template('index.html', questExists = questExists, user = user,  groups= groups, friends=friends, tasks=tasks, group = getGroup(group))
@@ -476,7 +481,7 @@ def addFriend():
         # Check if user exists
         else:
             friendID = database.findUser(friendName)
-            print(friendID)
+            #print(friendID)
             
             # User does not exist
             if friendID == -1:
@@ -608,7 +613,7 @@ def watch(curr, group, task):
     img_name = 'media/' + str(group) + '/' + str(task) + '/' + secure_name
 
 
-    print(img_name)
+    #print(img_name)
     #check what button is pressed
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()

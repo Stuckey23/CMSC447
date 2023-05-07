@@ -29,6 +29,7 @@ def newGroup(user_id, group_name):
         groupId = int(db.findGroup(group_name))
         addOwnerToGroup(user_id, groupId)
         result = 'SUCCESS'
+        print("Created new group %s with owner %s" % (group_name, user_id))
    
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -115,13 +116,13 @@ def getGroupRelationship(user_id,group_id):
 # Get List of Groups User Belongs to
 def getGroupNamesOfUser(user_id):
     groups = []
-    relation = 'MEMBER'
+    relation = 'REQUESTED'
     try:
         cur.execute( "SELECT group_name \
                     FROM public.group AS user_group \
                     INNER JOIN public.user_list AS user_list \
                     ON user_group.group_id = user_list.group_id \
-                    WHERE user_list.user_id = %s and group_relation = %s", \
+                    WHERE user_list.user_id = %s and group_relation != %s", \
                     [user_id,relation] )
         rows = cur.fetchall()
 
@@ -134,6 +135,7 @@ def getGroupNamesOfUser(user_id):
             groups.append(group_name)
 
         conn.commit()
+        print("Found these groups for user %s: %s" % (user_id, groups))
         return groups
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -151,8 +153,8 @@ def deleteGroupExistence(userId, groupId):
     if(owner == userId):
         # Delete Members from Group and then actual group
         cur.execute("DELETE FROM public.user_list WHERE group_id = %s; \
-                    DELETE FROM public.group WHERE group_id = %s", [groupId])
-        conn.commit
+                    DELETE FROM public.group WHERE group_id = %s", (groupId, groupId))
+        conn.commit()
         return 'SUCCESS'
     
     else:
@@ -160,6 +162,12 @@ def deleteGroupExistence(userId, groupId):
 
 # Need to add error-handlig
 def getGroupOwner(groupId):   
-    owner = cur.execute("SELECT owner FROM public.group WHERE group_id = %s", [groupId])
-    conn.commit()
-    return owner
+    try:
+        cur.execute("SELECT owner FROM public.group WHERE group_id = %s", [groupId])
+        owner = cur.fetchone()[0]
+        conn.commit()
+        return owner
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Cannot get group owner. Try again")
+        conn.rollback() 
