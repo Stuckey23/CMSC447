@@ -86,7 +86,7 @@ class LoginForm(FlaskForm):
 
 class Groups():
     def __init__(self, users, id):
-        self.users = users #users in the group will be added later
+        self.users = [] #users in the group will be added later
         self.id = id       #group id
         self.name = "group" + str(id) 
         self.tasks = []    #lists of all tasks 
@@ -220,14 +220,17 @@ def handleSidebar(request):
         "newGroup": newGroup,
         "deleteGroup": deleteGroup,
         "log-out": logOut,
-        "groupSelect": groupSelect
+        "groupSelect": groupSelect,
+        "inviteFriend": inviteFriend
         }
     
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "sidebar":
-            
-            return functions[request.form.get('button')](request.form.get('value'))
+            if request.form.get('button') == "inviteFriend":
+                return functions[request.form.get('button')](request.form.get('value'), request.form.get('value2'))
+            else:
+                return functions[request.form.get('button')](request.form.get('value'))
     
 def acceptFriendRequest(arg):
     friendName = arg
@@ -262,11 +265,15 @@ def acceptGroup(arg):
     username = session["user"]
     groupName = arg
     print("%s joined the group: %s" % (username, groupName))
-    #database.addUserToGroup(username, groupName)
+    print(database.acceptGroupRequest(username, groupName))
     return redirect(url_for('home', group = 0))
 
 def declineGroup(arg):
-    return
+    username = session["user"]
+    groupName = arg
+    print("%s declined the group: %s" % (username, groupName))
+    database.declineGroup(username, groupName)
+    return redirect(url_for('home', group = 0))
 
 def newGroup(arg):
     return redirect(url_for('groupCreation'))
@@ -287,6 +294,11 @@ def logOut(arg):
 def groupSelect(arg):
     return redirect(url_for('home', group = arg))
 
+def inviteFriend(username, groupName):
+    print("Inviting %s to group %s!" % (username, groupName))
+    message = database.requestGroupMember(username, groupName)
+    print(message)
+
 def getGroup(id):
     for group in groups:
         if group.id == int(id):
@@ -301,17 +313,31 @@ def validateUser():
 
 def formGroupsFromDB(username):
     groupNames = database.getGroupNamesOfUser(username)
-    print("%s has groups %s" % (username, groupNames))
     groups.clear()
     for name in groupNames:
         newGroup = Groups("None", len(groups))
         newGroup.set_name(name)
         # eventually pull tasks from database
         newGroup.set_tasks([])
+        userIDs = database.getUsersInGroup(name)
+        for id in userIDs:
+            username = database.findUserWithID(id)
+            newGroup.users.append(username)
+        #newGroup.users = database.getUsersInGroup(name)
+        #print("here!", name)
         #newGroup = newGroup.toDictionary()
         #newGroup.set_tasks()
+        newGroup.memberStatus = "MEMBER"
         groups.append(newGroup)
-        print("adding group! %s" % newGroup.name)
+        print("adding group! %s with users: %s" % (newGroup.name, newGroup.users))
+
+    pendingGroups = database.getPendingGroupNamesOfUser(username)
+    for group in pendingGroups:
+        newGroup = Groups("None", len(groups))
+        newGroup.set_name(group)
+        newGroup.set_tasks([])
+        newGroup.memberStatus = "REQUESTED"
+        groups.append(newGroup)
 
     #print(groups)
     return groups     
@@ -327,18 +353,11 @@ def formFriendsFromDB(username):
 
     pendingNames = database.getFriendRequests(username)
     for name in pendingNames:
-        #print("appending ", name)
         friends.append({
             "name": name,
             "isFriend": False
         })
     
-        
-        #print("friend! %s" % frinewGroup.get("name"))
-
-    #print(groups)
-    #print("testing ", database.findUser("erinm5"))
-    #print("testing ", database.getFriendRequests(username))
     return friends
 
 #creates the website on localhost:5000
@@ -380,9 +399,6 @@ def home(group):
     groups = formGroupsFromDB(user)
     friends = formFriendsFromDB(user)
 
-    #print("g1", groups)
-
-
     group = int(group)
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
@@ -405,7 +421,7 @@ def home(group):
     #print("tasks ", tasks)
     questExists = len(tasks)
     
-    return render_template('index.html', questExists = questExists, user = user,  groups= groups, friends=friends, tasks=tasks, group = getGroup(group))
+    return render_template('index.html', questExists = questExists, user = user,  groups= groups, friends=friends, tasks=tasks, currGroup = getGroup(group))
 
 @app.route('/group_create', methods=['GET', 'POST'])
 def groupCreation():
@@ -447,7 +463,7 @@ def groupCreation():
             flash(result)
             # Need to return to previous page but flash the message somehow.
         
-    return render_template("newGroup.html", form = form, user = user, groups=groups, friends=friends)
+    return render_template("newGroup.html", form = form, user = user, groups=groups, friends=friends, currGroup = None)
 
 @app.route('/add_friend', methods=['GET', 'POST'])
 def addFriend():
@@ -506,7 +522,7 @@ def addFriend():
         # temp_groups.append(group)
         # print("%s created group: %s" % (username, groupName))
         
-    return render_template("newFriend.html", form = form, groups=groups, friends=friends)
+    return render_template("newFriend.html", form = form, groups=groups, friends=friends, currGroup = None)
 
 
 #/create, collects text information to create a task
@@ -550,7 +566,7 @@ def create(group):
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
-    return render_template("create.html", form = form, groups=groups, friends=friends)
+    return render_template("create.html", form = form, groups=groups, friends=friends, currGroup = getGroup(group))
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
@@ -592,7 +608,7 @@ def upload(group, task):
         #database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
-    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends)
+    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends, currGroup = getGroup(group))
            
 
 #/watch/<curr> creates webpage to veiw the actual submissions, curr is the submission
@@ -656,7 +672,7 @@ def watch(curr, group, task):
         return redirect(url_for('watch', curr=curr, group = group, task = task))
     # Load the webpage
     else:
-            return  render_template('watch.html', user = user, filename = filename, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, comments = temp_groups[group].tasks[task].get("submissions")[curr].comments, form = form)
+            return  render_template('watch.html', user = user, filename = filename, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, comments = temp_groups[group].tasks[task].get("submissions")[curr].comments, form = form, currGroup = getGroup(group))
     
 
  #/results, webpage to view the top upvoted

@@ -143,6 +143,35 @@ def getGroupNamesOfUser(user_id):
         print("Cannot display groups. Try again")
         conn.rollback() 
 
+def getPendingGroupNamesOfUser(user_id):
+    groups = []
+    relation = 'REQUESTED'
+    try:
+        cur.execute( "SELECT group_name \
+                    FROM public.group AS user_group \
+                    INNER JOIN public.user_list AS user_list \
+                    ON user_group.group_id = user_list.group_id \
+                    WHERE user_list.user_id = %s and group_relation = %s", \
+                    [user_id,relation] )
+        rows = cur.fetchall()
+
+        if(rows == None):
+           return groups 
+
+        # Store Results
+        for row in rows:
+            group_name = row[0]
+            groups.append(group_name)
+
+        conn.commit()
+        print("Found these pending groups for user %s: %s" % (user_id, groups))
+        return groups
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Cannot display pending groups. Try again")
+        conn.rollback() 
+
 # Owner Deletes Group
 def deleteGroupExistence(userId, groupId):   
 

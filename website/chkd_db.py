@@ -107,7 +107,6 @@ def acceptGroupRequest(username, group_name):
     message = 'Request failed.'
     user_id = int(findUser(username))
     group_id = int(findGroup(group_name))
-
     if(user_id > 0 and group_id > 0):
         relationship = groups.getGroupRelationship(user_id,group_id)
 
@@ -117,8 +116,8 @@ def acceptGroupRequest(username, group_name):
 
         # Send request to database (User accepts)
         else:
-            result = groups.acceptGroupRequest(user_id,group_id,relationship)
-
+            result = groups.acceptGroupRequest(user_id,group_id, relationship)
+            print("res " + result)
             if result == 'SUCCESS':
                 return 'You have successfully joined ' + group_name
 
@@ -131,12 +130,10 @@ def declineGroup(username, group_name):
     message = 'Failed to leave ' + group_name
     user_id = int(findUser(username))
     group_id = int(findGroup(group_name))
-
     # User and Group Exist
     if(user_id > 0 and group_id > 0):
         relationship = groups.getGroupRelationship(user_id,group_id)
-
-        if(relationship == 'MEMBER'):
+        if(relationship == 'REQUESTED'):
             result = groups.declineGroupRequest(user_id,group_id,relationship)
 
             if result == 'SUCCESS':
@@ -273,6 +270,32 @@ def removeUserFromGroup(username, group_name):
 
     return message
 
+def getUsersInGroup(group_name):
+    try:
+        cur.execute("SELECT user_id FROM public.group AS user_group \
+                    INNER JOIN public.user_list AS user_list \
+                    ON user_group.group_id = user_list.group_id \
+                    WHERE user_group.group_name = %s", [group_name])
+        rows = cur.fetchall()
+        if(rows == None):
+           return []
+
+        users = []
+        # Store Results
+        for row in rows:
+            user = row[0]
+
+            users.append(user)
+
+        conn.commit()
+
+        return users
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Cannot get users. Try again")
+        conn.rollback() 
+
+
 def deleteGroupExistence(username, group_name):
     message = "Failed to delete group"
 
@@ -313,6 +336,12 @@ def getGroupNamesOfUser(username):
     if(user_id > 0):
         return groups.getGroupNamesOfUser(user_id)
     
+# Lists all group names the user belongs to
+def getPendingGroupNamesOfUser(username):
+    user_id = int(findUser(username))
+    if(user_id > 0):
+        return groups.getPendingGroupNamesOfUser(user_id)
+    
 # Look for group via name
 def findGroup(groupName):
     try:
@@ -351,6 +380,26 @@ def findUser(username):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         print("The username search failed. Try again")
+        conn.rollback() 
+
+# Look for user via id
+def findUserWithID(userID):
+    try:
+        cur.execute( "SELECT username FROM public.user WHERE user_id = %s", [userID] )
+        userId = cur.fetchone()
+        conn.commit()
+
+        # checks if user exists
+        if(userId):
+            userId = userId[0]
+            return userId
+        
+        else:
+            return -1
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("The userID search failed. Try again")
         conn.rollback() 
 
 # Get Posts by user

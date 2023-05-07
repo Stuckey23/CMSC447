@@ -36,11 +36,15 @@
         {% for group in groups %}
             <div class="container" style="display: flex; color: white; font-family: Verdana, sans-serif; margin-bottom: 7px;">
                 <div style="flex-grow: 1;"> 
+                    {% if group.memberStatus != "REQUESTED" %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
                         <input type="hidden" name="value" value="{{group.id}}">
                         <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
                     </form> 
+                    {%else%}
+                        {{group.name}}
+                    {%endif%}
                 </div>
                 <div style="flex-grow: 1; line-height: 1.3;">
                     <!-- Checks friend status to decide which to show -->
@@ -54,10 +58,10 @@
                     </form> 
                     {% endif %}
 
-                    {% if group.memberStatus == "PENDING" %}
+                    {% if group.memberStatus == "REQUESTED" %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
-                        <input type="hidden" name="value" value="{{group.id}}">
+                        <input type="hidden" name="value" value="{{group.name}}">
                         <button type="submit" name="button" value="acceptGroup" style="float: right; margin-left: 5px;">
                             Accept
                         </button>
@@ -128,6 +132,18 @@
                                 Remove Friend
                             </button>
                         </form> 
+                        {% if currGroup != None %} 
+                            {% if friend.name not in currGroup.users %}
+                                <form action="#" method="post">
+                                    <input type="hidden" name="formType" value="sidebar">
+                                    <input type="hidden" name="value" value="{{friend.name}}">
+                                    <input type="hidden" name="value2" value="{{currGroup.name}}">
+                                    <button type="submit" name="button" value="inviteFriend" style="float: right; margin-bottom: 5px;">
+                                        Invite Friend
+                                    </button>
+                                </form> 
+                            {% endif %}
+                        {% endif %}
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
                     <form action="#" method="post">

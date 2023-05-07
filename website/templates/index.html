@@ -12,10 +12,10 @@
         </div>
         <div style="flex-grow: 1; margin-left: 20px;" class="column;">
             <h1 style="text-align:center">
-                 {{group.name}} Quests: 
+                 {{currGroup.name}} Quests: 
                 <form action="#" method="post">
                     <input type="hidden" name="formType" value="home">
-                    <input type="hidden" name="group" value="{{group.id}}">
+                    <input type="hidden" name="group" value="{{currGroup.name}}">
                     <button type="submit" name="button" value="newQuest">Create New Quest</button>
                 </form>
             </h1>
