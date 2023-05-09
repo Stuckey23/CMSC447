@@ -121,8 +121,9 @@ def getGroupNamesOfUser(user_id):
                     FROM public.group AS user_group \
                     INNER JOIN public.user_list AS user_list \
                     ON user_group.group_id = user_list.group_id \
-                    WHERE user_list.user_id = %s and group_relation = %s", \
+                    WHERE user_list.user_id = %s and (group_relation = %s or group_relation = 'OWNER'", \
                     [user_id,relation] )
+
         rows = cur.fetchall()
 
         if(rows == None):
@@ -149,16 +150,42 @@ def deleteGroupExistence(userId, groupId):
 
     if(owner == userId):
         # Delete Members from Group and then actual group
-        cur.execute("DELETE FROM public.user_list WHERE group_id = %s; \
-                    DELETE FROM public.group WHERE group_id = %s", [groupId])
+        cur.execute("DELETE FROM public.group WHERE group_id = %s", [groupId])
         conn.commit
         return 'SUCCESS'
     
     else:
         return 'FAILED'
+    
+# Owner Deletes Challenge
+def deleteChallenge(userId, groupId, challengeId):   
 
-# Need to add error-handlig
+    # Check if user is the OWNER
+    owner = getGroupOwner(groupId)
+
+    if(owner == userId):
+        cur.execute("DELETE FROM public.challenge WHERE group_id = %s", [challengeId, challengeId])
+        conn.commit
+        return 'SUCCESS'
+
+    return 'FAILED'
+    
+
+# Get the owner of the group by group id
 def getGroupOwner(groupId):   
-    owner = cur.execute("SELECT owner FROM public.group WHERE group_id = %s", [groupId])
-    conn.commit()
-    return owner
+    try:
+        cur.execute("SELECT owner FROM public.group WHERE group_id = %s", [groupId])
+        owner = cur.fetchone()
+        conn.commit()
+
+        if(owner):
+            owner = owner[0]
+            return owner
+        
+        else:
+            return None        
+        
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("Failed to get owner. Try again")
+        conn.rollback()

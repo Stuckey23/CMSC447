@@ -447,12 +447,13 @@ def create(group):
         # add quest to group here
 
         # Get the input from user
-        user = session["user"]
-        #group = 'EVERYONE' # get the group -- need to find way to get the group name
-
-    
+        user = str(session["user"])
+        groupA = 'test'                          # Still need to find a way to get the group
+        quest = str(quest) 
+        rules = str(rules) 
+ 
         # Call to Database
-        #database.newChallenge(user, group, quest, rules)
+        database.newChallenge(user, groupA, quest, rules)
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
@@ -489,13 +490,13 @@ def upload(group, task):
             temp_groups[group].add_submission(sub)
             #temp_submissions.append(sub)
 
-        # Update the Database
-        submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
-        user = session["user"]
-        challenge_id = 1
+            # Update the Database
+            submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
+            user = session["user"]
+            challenge_id = 3
 
-        # Call to Database
-        #database.newPost(user, submissionFile, challenge_id)
+            # Call to Database
+            database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=temp_groups, friends=friends)

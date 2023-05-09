@@ -27,8 +27,11 @@ def addFriend(userA, userB):
         # Make the Database Calls
         userid_A = int(db.findUser(userA))
         userid_B = int(db.findUser(userB))
+
+    
         cur.execute("UPDATE public.relation SET relationship='FRIENDS',created_at=%s WHERE userA=%s and userB=%s",[curr_time, userid_A, userid_B])
-        conn.commit()    
+        conn.commit()
+        
         return 'You have successfully added ' + userB
     
     # Relationship DOES NOT exist
@@ -44,10 +47,17 @@ def requestFriend(userA, userB):
         userA = int(db.findUser(userA))
         userB = int(db.findUser(userB))
         relation = "REQUESTED"
-        # Make the Database Call
-        cur.execute("INSERT INTO public.relation(person_a,person_b,relationship,created_at) VALUES (%s, %s,%s, %s)",\
-                    [userA, userB, relation,curr_time])
-        conn.commit()
+        # Mke the Database Call
+        
+        # Enter into db in certain order
+        if userA < userB:
+            cur.execute("INSERT INTO public.relation(person_a,person_b,relationship,created_at) VALUES (%s, %s,%s, %s)",\
+                        [userA, userB, relation,curr_time])
+            conn.commit()
+        else:
+            cur.execute("INSERT INTO public.relation(person_a,person_b,relationship,created_at) VALUES (%s, %s,%s, %s)",\
+                        [userB, userA, relation,curr_time])
+            conn.commit()
 
         return 'SUCCESS'   
 

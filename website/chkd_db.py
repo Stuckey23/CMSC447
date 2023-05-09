@@ -6,6 +6,8 @@ from decimal import Decimal
 
 import db_friends as friends
 import db_groups as groups
+import db_posts as quests
+
 
 # Connect to the CHKD Database
 curr_time = datetime.datetime.now(pytz.timezone('US/Eastern'))
@@ -29,15 +31,11 @@ def newUser():
 def newChallenge(user, group, title, description):
     # Gets the user ID
     user_id = findUser(user)
-
     # Gets the group ID
     group_id = findGroup(group)
 
     if(group_id > 0 and user_id > 0):
-        # Make the Database Call
-        cur.execute("INSERT INTO public.challenge (author,description, group_id, challenge_date,title) \
-                    VALUES (%s, %s,%s, %s, %s)", [user_id, description, group_id, curr_time, title])
-        conn.commit()
+        quests.addChallenge(user_id, group_id, title, description)
 
 # Submit File
 def newPost(user, file, challenge_id):
@@ -54,6 +52,34 @@ def newPost(user, file, challenge_id):
         print(error)
         print("Failed to add post. Try again")
         conn.rollback() 
+
+
+# Get List of Posts by CHALLENGE -- NOT DONE
+def getPostsByChallenge(challenge):
+    
+    # Obtain Challenge ID
+    challenge_id = challenge
+
+    posts = quests.getPostsByChallenge(challenge_id)
+    return posts
+
+# Create a Comment
+def addComment(post_id, username, comment):
+    # Gets the user ID
+    userId = int(findUser(username))
+    quests.insertComment(post_id, userId, comment)
+
+# Upvote Post -- NEED TO FIGURE OUT HOW I NEED TO GRAB POST
+def upvote(post_id, username):
+    # Gets the user ID
+    userId = int(findUser(username))
+    quests.reactToPost(post_id, userId, 1)
+
+# Downvote Post -- NEED TO FIGURE OUT HOW I NEED TO GRAB POST
+def upvote(post_id, username):
+    # Gets the user ID
+    userId = int(findUser(username))
+    quests.reactToPost(post_id, userId, -1)
 
 # Request Member to Join Group
 def requestGroupMember(username, group_name):
@@ -216,14 +242,7 @@ def removeFriend(userA, userB):
     else:
         return False
 
-# Create a Comment
-def addComment(post, user, comment):
-    # Gets the user ID
-    userId = int(findUser(user))
 
-    # Make the Database Call
-    cur.execute("INSERT INTO public.comment(post_id,commenter,message, created_at) VALUES (%s, %s, %s, %s)",[post, userId, comment, curr_time])
-    conn.commit()
 
 # Creates a new Group
 def newGroup(name, owner):
@@ -350,17 +369,30 @@ def GetPosts(username):
         print("Failed to generate feed. Try again")
         conn.rollback() 
 
+# Remove Posts 
+
+'''
+def removePost(post_id):
+   quests.removePost(post_id)
+
+def removeChallenge():
+    quests.removeChallenge(challenge_id)
+'''
+
+
 # Get List of Friends
 def getFriends(username):
     user_id = findUser(username)
     friends = []
 
     try:
-        cur.execute( "SELECT username \
-                    FROM public.relation AS user_relation, public.user as users \
-                    WHERE user_id = %s and \
-                    (user_id = person_a or user_id = person_b) and \
-                    relationship = 'FRIEND'", \
+        cur.execute("SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_b = %s and f.relationship = 'FRIEND' \
+                    union \
+                    SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_a = %s and f.relationship = 'FRIEND'",
                     [user_id] )
         
         results = cur.fetchall()
@@ -382,24 +414,23 @@ def getFriends(username):
         conn.rollback() 
 
 
-
 # Get List of Requests
 def getFriendRequests(username):
     user_id = findUser(username)
     requests = []
 
     try:
-        cur.execute( "SELECT username \
-                    FROM public.relation AS user_relation, public.user as users \
-                    WHERE user_id = %s and \
-                    (user_id = person_a or user_id = person_b) and \
-                    relationship = 'REQUESTED'", \
-                    [user_id] )
-        
+        cur.execute("SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id \
+                    WHERE f.person_b = %s and f.relationship = 'REQUESTED'\
+                    union \
+                    SELECT username from public.user u \
+                    INNER JOIN public.relation f on f.person_a = u.user_id WHERE f.person_a = %s and f.relationship = 'REQUESTED'",
+                    [user_id,user_id])
         results = cur.fetchall()
         conn.commit()
 
-        # checks if reqeusts exist
+        # checks if requests exist
         if(results == None):
           return
         
