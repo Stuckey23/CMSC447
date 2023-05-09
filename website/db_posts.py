@@ -65,9 +65,10 @@ def getChallengesByGroup(group_name):
     challenges = []
 
     try:
-        cur.execute("SELECT c.challenge_id, c.title, c.description \
-                    from public.challenge c  \
-                    WHERE p.group_id = %s" , [group_id])
+        print("gid %s" % group_id)
+        cur.execute("SELECT challenge_id, title, description \
+                    from public.challenge  \
+                    WHERE group_id = %s" , [group_id])
         quests = cur.fetchall()
         conn.commit()
 

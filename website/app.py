@@ -328,11 +328,13 @@ def formGroupsFromDB(username):
         for id in userIDs:
             username = database.findUserWithID(id)
             newGroup.users.append(username)
-        #newGroup.users = database.getUsersInGroup(name)
-        #print("here!", name)
-        #newGroup = newGroup.toDictionary()
-        #newGroup.set_tasks()
         newGroup.memberStatus = "MEMBER"
+
+        challengeInfo = posts.getChallengesByGroup(name)
+        for challenge in challengeInfo:
+            newGroup.add_task(challenge[1], challenge[2])
+            #print(newGroup.tasks)
+ 
         groups.append(newGroup)
         print("adding group! %s with users: %s" % (newGroup.name, newGroup.users))
 
@@ -344,6 +346,8 @@ def formGroupsFromDB(username):
         newGroup.memberStatus = "REQUESTED"
         groups.append(newGroup)
 
+    
+    #self.tasks.append({"id": len(self.tasks), "title": quest, "rules": rules, "submissions":submissions})
     #print(groups)
     return groups     
 
@@ -365,7 +369,7 @@ def formFriendsFromDB(username):
     
     return friends
 
-def formChallengesFromDB(challenge):
+def formSubmissionsFromDB(challenge):
     challengeInfo = database.getPostsByChallenge(challenge)
     challenges.clear()
     for challenge in challengeInfo:
@@ -430,7 +434,7 @@ def home(group):
     
     theGroup = getGroup(group)
     
-    tasks = []
+    tasks = theGroup.tasks
     #tasks = theGroup.tasks
     #print("tasks ", tasks)
     questExists = len(tasks)
@@ -546,6 +550,7 @@ def create(group):
     #print("grrrop " + database.get group.id)
     group = int(group)
     form = QuestForm()
+    groups = formGroupsFromDB(session["user"])
 
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
@@ -561,11 +566,12 @@ def create(group):
     if request.method == "POST" and formType != "sidebar":
         quest = form.quest.data # First grab the file
         rules = form.rules.data
+
         #create new submission
         #print("herezzz ", groups[group].add_task(quest, rules))
         #uncomment
-        print("working! %s" % (groups))
-        database.newChallenge(session["user"], groups[group], quest, rules)
+        #print("working! %s" % (groups[0].id))
+        database.newChallenge(session["user"], groups[group].name, quest, rules)
         #groups[group].add_task(quest, rules)
 
 
