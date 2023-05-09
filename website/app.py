@@ -123,6 +123,8 @@ class Groups():
         #get the right task folder
         task_path = os.path.join(self.group_path, str(submission.task))
         #get the media file number
+        print("sub task" + str(submission.task))
+        print(self.tasks)
         file_num = len(self.tasks[submission.task].get("submissions"))
         #create new name to prevent error / hacks
         file_name = secure_filename(str(file_num) + submission.file.filename)
@@ -133,6 +135,13 @@ class Groups():
         submission.setname(file_name)
         #add submission to submissions list 
         self.tasks[submission.task].get("submissions").append(submission)
+
+        return file_name
+
+    #def add_submission_fromDB(self, submission):
+
+
+    
 
 class Submission():
     def __init__(self, user, task, file, votes):
@@ -151,7 +160,7 @@ class Submission():
         self.votes += 1
     def downvote(self):
         self.votes -=1
-    def commnet(self, input):
+    def comment(self, input):
         self.comments.append(input)
     
 
@@ -192,7 +201,6 @@ def handleHome(request):
     if request.method == "POST":
         formType = request.form.get('formType')
         if formType == "home":
-            #print("PLEASE WORK")
             #print(request.form.get('group'))
             return functions[request.form.get('button')](request.form.get('group'), (request.form.get('task')))
 
@@ -331,10 +339,20 @@ def formGroupsFromDB(username):
         newGroup.memberStatus = "MEMBER"
 
         challengeInfo = posts.getChallengesByGroup(name)
+        inc = 0
         for challenge in challengeInfo:
             newGroup.add_task(challenge[1], challenge[2])
+            submissionInfo = posts.getPostsByChallenge(challenge[0])
+            
+            for submission in submissionInfo:
+                #print("sub sub %s" % submission)
+                sub = Submission(database.findUserWithID(submission[1]), inc, submission[3], submission[2]) 
+                newGroup.tasks[len(newGroup.tasks) - 1].get("submissions").append(submission)
+                #newGroup.add_submission(sub)
+            inc += 1
             #print(newGroup.tasks)
  
+        print(newGroup.tasks)
         groups.append(newGroup)
         print("adding group! %s with users: %s" % (newGroup.name, newGroup.users))
 
@@ -551,6 +569,7 @@ def create(group):
     group = int(group)
     form = QuestForm()
     groups = formGroupsFromDB(session["user"])
+    friends = formFriendsFromDB(session["user"])
 
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
@@ -598,10 +617,22 @@ def upload(group, task):
     group = int(group)
     task = int(task)
     form = UploadFileForm()
-    file_num = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))) 
+    #file_num = len(os.path.join(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER'])),secure_filename(str(id))))
+    #os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))
+    file_num = len(os.listdir(
+                os.path.join(
+                    root_path, 
+                    app.config['MEDIA_FOLDER']
+                    )
+                )
+            )
+    print("file" + str(file_num)) 
+
+    groups = formGroupsFromDB(session["user"])
+    friends = formFriendsFromDB(session["user"])
     
-    quest_msg = temp_groups[group].tasks[task].get("title")
-    rules_msg = temp_groups[group].tasks[task].get("rules")
+    quest_msg = groups[group].tasks[task].get("title")
+    rules_msg = groups[group].tasks[task].get("rules")
     #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
     if results != None:
@@ -616,19 +647,24 @@ def upload(group, task):
     if request.method == "POST" and formType != "sidebar":
         if form.validate_on_submit():
             file = form.file.data # First grab the file
-            sub = Submission(session["user"] , task, file)
+            dbChallengeID = database.findChallenge(quest_msg)
+            sub = Submission(session["user"] , task, file, 0)
+            #len(self.tasks[submission.task].get("submissions"))
             
             #update the fake databse
-            temp_groups[group].add_submission(sub)
+            submissionFile = groups[group].add_submission(sub)
+            #temp_groups[group].add_submission(sub)
             #temp_submissions.append(sub)
+            
+            #database.newPost(session["user"], file, task)
 
         # Update the Database
-        submissionFile = root_path + 'static\\media\\' + secure_filename(str(file_num) + file.filename)
+        #submissionFile = 'media\\' + str(group) + '\\' + str(task) + '\\' + secure_filename(str(file_num) + file.filename)
         user = session["user"]
-        challenge_id = 1
+        challenge_id = database.findChallenge(quest_msg)
 
         # Call to Database
-        #database.newPost(user, submissionFile, challenge_id)
+        database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
     return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends, currGroup = getGroup(group))
@@ -643,13 +679,17 @@ def watch(curr, group, task):
     form = CommentForm()
     curr = int(curr)
     #this is the original unmodifed file name
-    filename = temp_groups[group].tasks[task].get("submissions")[curr].file.filename
+
+    groups = formGroupsFromDB(session["user"])
+    friends = formFriendsFromDB(session["user"])
+    filename = groups[group].tasks[task].get("submissions")[curr][3]
+    #print("ddd %s" % groups[group].tasks[task].get("submissions")[curr][3])
 
    
-    user = temp_groups[group].tasks[task].get("submissions")[curr].user
-    folder_len = len(temp_groups[group].tasks[task].get("submissions")) -1
-    secure_name = temp_groups[group].tasks[task].get("submissions")[curr].getname()
-    img_name = 'media/' + str(group) + '/' + str(task) + '/' + secure_name
+    user = groups[group].tasks[task].get("submissions")[curr][1]
+    folder_len = len(groups[group].tasks[task].get("submissions")) -1
+    #secure_name = groups[group].tasks[task].get("submissions")[curr][3]
+    img_name = 'media/' + str(group) + '/' + str(task) + '/' + filename
 
 
     #print(img_name)
@@ -695,7 +735,10 @@ def watch(curr, group, task):
         return redirect(url_for('watch', curr=curr, group = group, task = task))
     # Load the webpage
     else:
-            return  render_template('watch.html', user = user, filename = filename, user_input = img_name, media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, friends=friends, comments = temp_groups[group].tasks[task].get("submissions")[curr].comments, form = form, currGroup = getGroup(group))
+            return  render_template('watch.html', user = database.findUserWithID(user), filename = filename, user_input = img_name, \
+                                    media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
+                                        friends=friends, comments = [], \
+                                            form = form, currGroup = getGroup(group))
     
 
  #/results, webpage to view the top upvoted
