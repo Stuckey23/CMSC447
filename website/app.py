@@ -13,6 +13,8 @@ import shutil
 from wtforms.validators import InputRequired, DataRequired, Length
 import socket
 
+import db_posts as posts
+
 
 #changed port number
 # Create Postgres Database Engine
@@ -24,6 +26,7 @@ audio_formats = [".mp3", ".m4a", ".wav"] # hardcoded audio formats
 #testing
 # Hard coded groups and friends. This eventually needs to come from the database
 groups = []
+challenges = []
 
         # ADD FRIENDS
         # userA = session.get("user")
@@ -91,7 +94,7 @@ class Groups():
         self.name = "group" + str(id) 
         self.tasks = []    #lists of all tasks 
         self.memberStatus = "OWNER"
-        #creates group folder nside of media
+        #creates group folder inside of media
         self.group_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(id)))
         #self.group_path = os.path.join(app.config['MEDIA_FOLDER'], str(id))
         if(not os.path.exists(self.group_path)):
@@ -114,6 +117,8 @@ class Groups():
         task_path = os.path.join(self.group_path, str(len(self.tasks) -1))
         if(not os.path.exists(task_path)):
            os.mkdir(task_path)
+
+        posts.getPostsByChallenge(int(len(self.tasks )- 1))
         return True
 
     def add_submission(self, submission):
@@ -360,6 +365,14 @@ def formFriendsFromDB(username):
     
     return friends
 
+def formChallengesFromDB(challenge):
+    challengeInfo = database.getPostsByChallenge(challenge)
+    challenges.clear()
+    for challenge in challengeInfo:
+        newChallenge = Submission(database.findUserWithID(challenge[1]), challenge, challenge[3], challenge[2])
+        challenges.append(newChallenge)
+    return challenges
+
 #creates the website on localhost:5000
 @app.route('/', methods=['GET',"POST"])
 
@@ -531,8 +544,9 @@ def addFriend():
 def create(group):
     group = int(group)
     form = QuestForm()
-
-    #check that the user actually sigined in and didn't manually type the url
+    groups = formGroupsFromDB(session["user"])
+    
+    #check that the user actually signed in and didn't manually type the url
     results = validateUser()
     if results != None:
         return results
@@ -546,6 +560,8 @@ def create(group):
     if request.method == "POST" and formType != "sidebar":
         quest = form.quest.data # First grab the file
         rules = form.rules.data
+
+        database.newChallenge(session["user"], groups[group].name, quest, rules)
         #create new submission
         #print("herezzz ", groups[group].add_task(quest, rules))
         #uncomment

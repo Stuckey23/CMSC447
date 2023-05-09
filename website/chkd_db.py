@@ -28,16 +28,17 @@ def newUser():
 # Submit Challenge
 def newChallenge(user, group, title, description):
     # Gets the user ID
+    print(group)
     user_id = findUser(user)
-
-    # Gets the group ID
     group_id = findGroup(group)
+    print("inserting challenge...")
 
-    if(group_id > 0 and user_id > 0):
+    #if(group_id >= 0 and user_id > 0):
         # Make the Database Call
-        cur.execute("INSERT INTO public.challenge (author,description, group_id, challenge_date,title) \
-                    VALUES (%s, %s,%s, %s, %s)", [user_id, description, group_id, curr_time, title])
-        conn.commit()
+    cur.execute("INSERT INTO public.challenge (author,description, group_id, challenge_date,title) \
+                VALUES (%s, %s,%s, %s, %s)", [user_id, description, group_id, curr_time, title])
+    conn.commit()
+    print("PASSED")
 
 # Submit File
 def newPost(user, file, challenge_id):
@@ -342,14 +343,14 @@ def getPendingGroupNamesOfUser(username):
     if(user_id > 0):
         return groups.getPendingGroupNamesOfUser(user_id)
     
-# Look for group via name
+# Look for group id via name
 def findGroup(groupName):
     try:
         cur.execute( "SELECT group_id FROM public.group WHERE group_name = %s", [groupName] )
         groupId = cur.fetchone()
         conn.commit()
 
-        # checks if group exists
+        # checks if group exists --> (group_id)
         if(groupId):
             groupId = groupId[0]
             return groupId
@@ -400,30 +401,6 @@ def findUserWithID(userID):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         print("The userID search failed. Try again")
-        conn.rollback() 
-
-# Get Posts by user
-def GetPosts(username):
-    user_id = int(findUser(username))
-    user_posts = []
-
-    try:
-        cur.execute( "SELECT post_id FROM public.post WHERE user_id = %s", [user_id] )
-        results = cur.fetchall()
-        conn.commit()
-
-        # checks if user exists
-        if(results == None):
-            return
-        
-        for result in results:
-            user_posts.append(result[0])
-        
-        return user_posts
-
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        print("Failed to generate feed. Try again")
         conn.rollback() 
 
 # Get List of Friends
