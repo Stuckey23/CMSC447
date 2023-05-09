@@ -94,7 +94,7 @@ class Groups():
         self.name = "group" + str(id) 
         self.tasks = []    #lists of all tasks 
         self.memberStatus = "OWNER"
-        #creates group folder inside of media
+        #creates group folder nside of media
         self.group_path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config['MEDIA_FOLDER'],secure_filename(str(id)))
         #self.group_path = os.path.join(app.config['MEDIA_FOLDER'], str(id))
         if(not os.path.exists(self.group_path)):
@@ -117,8 +117,6 @@ class Groups():
         task_path = os.path.join(self.group_path, str(len(self.tasks) -1))
         if(not os.path.exists(task_path)):
            os.mkdir(task_path)
-
-        posts.getPostsByChallenge(int(len(self.tasks )- 1))
         return True
 
     def add_submission(self, submission):
@@ -137,12 +135,12 @@ class Groups():
         self.tasks[submission.task].get("submissions").append(submission)
 
 class Submission():
-    def __init__(self, user, task, file):
+    def __init__(self, user, task, file, votes):
         self.user = user
         self.task = task
         self.file = file
         self.filename = ""
-        self.votes = 0
+        self.votes = votes
         self.comments = []
     def setname(self, name):
         self.filename = name
@@ -182,6 +180,7 @@ temp_group = Groups("none", 0)#temp group fo testing
 temp_groups.append(temp_group)
 
 
+
 def handleHome(request):
     functions = {
         "newSubmission": newSubmission,
@@ -210,6 +209,7 @@ def viewSubmission(group, task):
     return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
 
 def createQuest(group, task):
+    
     
     return redirect(url_for('create', group = group))
     
@@ -411,6 +411,7 @@ def home(group):
     # Gets a list of groups a user is in
     groups = formGroupsFromDB(user)
     friends = formFriendsFromDB(user)
+    #challenges = formChallengesFromDB()
 
     group = int(group)
     #check that the user actually sigined in and didn't manually type the url
@@ -542,11 +543,11 @@ def addFriend():
 #returns the upload page after any text is sumbitted
 @app.route('/create/<group>', methods=['GET', 'Post'])
 def create(group):
+    #print("grrrop " + database.get group.id)
     group = int(group)
     form = QuestForm()
-    groups = formGroupsFromDB(session["user"])
-    
-    #check that the user actually signed in and didn't manually type the url
+
+    #check that the user actually sigined in and didn't manually type the url
     results = validateUser()
     if results != None:
         return results
@@ -560,12 +561,12 @@ def create(group):
     if request.method == "POST" and formType != "sidebar":
         quest = form.quest.data # First grab the file
         rules = form.rules.data
-
-        database.newChallenge(session["user"], groups[group].name, quest, rules)
         #create new submission
         #print("herezzz ", groups[group].add_task(quest, rules))
         #uncomment
-        groups[group].add_task(quest, rules)
+        print("working! %s" % (groups))
+        database.newChallenge(session["user"], groups[group], quest, rules)
+        #groups[group].add_task(quest, rules)
 
 
         #tasks.append({"id": len(tasks), "title": quest, "rules": rules, "submissions":submissions})
