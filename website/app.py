@@ -12,7 +12,7 @@ import os
 import shutil
 from wtforms.validators import InputRequired, DataRequired, Length
 import socket
-
+from wtforms.widgets import TextArea, PasswordInput
 import db_posts as posts
 
 
@@ -81,7 +81,7 @@ class UploadFileForm(FlaskForm):
 #get login info
 class LoginForm(FlaskForm):
     name = StringField('name', validators=[DataRequired(), Length(max= 30)])
-    password = StringField('password', validators=[DataRequired(), Length(max= 30)])
+    password = StringField('password', validators=[DataRequired(), Length(max= 30)], widget=PasswordInput(hide_value=False))
     login = SubmitField("Login")
 
 #stores group info
