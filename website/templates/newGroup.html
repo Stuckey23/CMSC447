@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href='/static/home.css' />
+
+    <title>Group Creation</title>
+</head>
+<body>
+    <div class="container" style="display: flex;">
+        <div style="width: 35%; background-color: #4b6c84; border: 10px transparent; border-radius: 20px;" class="column left opacity;">
+            {% include "partials/sidebar.html" %}
+        </div>
+        <div style="flex-grow: 1;" class="column right;"">
+            <h1 style="text-align:center">Name your group!</h1>
+            <h2 style="text-align:center">
+
+            <form method="POST" action="#">
+                {{ form.csrf_token }}
+                {{ form.groupName(size=10, placeholder = "Enter group name here", rows = 1, cols = 30, style="resize:none") }}
+                <div></div>
+                <input type="hidden" name="formType" value="group">
+                <button type="submit" name="button" value="newGroupSubmit">Finalize Group Name</button>
+            </form>
+            </h2>
+        </div>
+</body>
+</html>

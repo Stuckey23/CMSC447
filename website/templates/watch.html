@@ -15,6 +15,7 @@
             <div>by: {{user}}</div>
             <div style="text-align: center">
                 {% if media == 1: %}
+                    <img width="100" height = "100">
                     <img src="{{url_for('static', filename=user_input)}}">
                 {% elif media == 2: %}
                     <video width="320" height="240" controls>
@@ -27,28 +28,42 @@
                 {% else: %}
                     <h1>Unsupported format</h1>
                 {% endif %}
-                
+
+            <form method="post" action="#">
+                {%if curr != 0:%}
+                    <button type="submit" name="submit_button" value="PREV">PREV</button>
+                {% endif %}
+                {%if curr != files:%} 
+                    <button type="submit" name="submit_button" value="NEXT">NEXT</button>
+                {% endif %}
+                <h4> UPVOTE:
+                    <button type="submit" name="submit_button" value="UP">UPVOTE</button>        
+                <h4>
+            </form>
+
+            <h6>  
+            
+            <form method="POST" action="#">
+                {{ form.csrf_token }}
+                <div>Comments</div>
+                {{ form.comment(size=10, placeholder = "add comment", rows = 10, cols = 100, style="resize:none") }}
+                <div></div>
+                <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
+                {% for comment in comments: %}
+                <div class="row">
+                        <div class="col-lg-4 "></div>
+                        <div class="col-lg-8 ">
+                        <div>
+                            <div style="height:fit-content; background-color:#d9d9d9; border: 5px solid #262626; border-radius: 10px;" class="column right">
+                            <P>{{user}}:</P>
+                            <p>{{comment}}</p>
+                        </div>
+                {%endfor%}    
+            </div>
+            </h6>  
+            </div>          
 
 
-                <h3>Load Another Submission</h3>
-                    <form method="post" action="#">
-                        {%if curr != 0:%}
-                            <input type="submit" name="submit_button" value="PREV">
-                        {% endif %}
-                        {%if curr != files:%} 
-                            <input type="submit" name="submit_button" value="NEXT">
-                        {% endif %}
-                        <h4> Upload Another Submission:
-                            <input type="submit" name="submit_button" value="NEW">      
-                        <h4>
-                        <h5> UPVOTE:
-                            <input type="submit" name="submit_button" value="UP">       
-                        <h5>
-                    </form>
-        </div>
-    </body>
-</html>
-
-    </div>
+    
 </body>
 </html>

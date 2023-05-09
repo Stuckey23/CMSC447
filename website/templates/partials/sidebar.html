@@ -31,18 +31,50 @@
 
     </div>
     <!-- Group List -->
-    <div>
+    <div style="line-height: 1.5;">
         <!-- Makes a row for each group -->
         {% for group in groups %}
             <div class="container" style="display: flex; color: white; font-family: Verdana, sans-serif; margin-bottom: 7px;">
                 <div style="flex-grow: 1;"> 
+                    {% if group.memberStatus != "REQUESTED" %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
                         <input type="hidden" name="value" value="{{group.id}}">
                         <button type="submit" name="button" value="groupSelect">{{group.name}}</button>
                     </form> 
+                    {%else%}
+                        {{group.name}}
+                    {%endif%}
                 </div>
-                <div style="flex-grow: 1; float: right;">
+                <div style="flex-grow: 1; line-height: 1.3;">
+                    <!-- Checks friend status to decide which to show -->
+                    {% if group.memberStatus == "OWNER" %}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.name}}">
+                        <button type="submit" name="button" value="deleteGroup" style="float: right; margin-bottom: 5px;">
+                            Delete Group
+                        </button>
+                    </form> 
+                    {% endif %}
+
+                    {% if group.memberStatus == "REQUESTED" %}
+                    <form action="#" method="post">
+                        <input type="hidden" name="formType" value="sidebar">
+                        <input type="hidden" name="value" value="{{group.name}}">
+                        <button type="submit" name="button" value="acceptGroup" style="float: right; margin-left: 5px;">
+                            Accept
+                        </button>
+                        <button type="submit" name="button" value="declineGroup" style="float: right;">
+                            Decline
+                        </button>
+                    </form> 
+                    {%endif%}
+                </div>
+                <!-- <div style="flex-grow: 1; float: right;"> -->
+
+                    <!-- Commented out text -->
+                    {#
                     <!-- Has dot if there's a notification in that group. Replace * with small image -->
                     {% if group.hasNotification %}
                         *
@@ -53,7 +85,9 @@
 
                     <!-- Needs member icon after this -->
                     {{group.totalMembers}}
-                </div>
+                    #}
+
+                <!-- </div> -->
             </div>
         {% endfor %}
     </div>
@@ -63,7 +97,7 @@
 
     <!-- Friend Section -->
     <!-- Friend Header -->
-    <div class="container" style="display: flex;">
+    <div class="container" style="display: flex; line-height: 1.3;">
         <div style="width: 50%;">
             <b style="color: white; font-size: 26px;">
                 Friends
@@ -80,14 +114,14 @@
 
     </div>
     <!-- Friend List -->
-    <div>
+    <div style="line-height: 1.3;">
         <!-- Makes a row for each friend -->
         {% for friend in friends %}
             <div class="container" style="display: flex;">
                 <div style="flex-grow: 1; color: white; font-family: Verdana, sans-serif;"> 
                     {{friend.name}}
                 </div>
-                <div style="flex-grow: 1;">
+                <div style="flex-grow: 1; line-height: 1.3;">
                     <!-- Checks friend status to decide which to show -->
                     {% if friend.isFriend %}
                         <!-- Replace buttons with hamburger menu? -->
@@ -98,16 +132,28 @@
                                 Remove Friend
                             </button>
                         </form> 
+                        {% if currGroup != None %} 
+                            {% if friend.name not in currGroup.users %}
+                                <form action="#" method="post">
+                                    <input type="hidden" name="formType" value="sidebar">
+                                    <input type="hidden" name="value" value="{{friend.name}}">
+                                    <input type="hidden" name="value2" value="{{currGroup.name}}">
+                                    <button type="submit" name="button" value="inviteFriend" style="float: right; margin-bottom: 5px;">
+                                        Invite Friend
+                                    </button>
+                                </form> 
+                            {% endif %}
+                        {% endif %}
                     <!-- If not friend, give user choice to accept/decline friend request -->
                     {% else %}
                     <form action="#" method="post">
                         <input type="hidden" name="formType" value="sidebar">
                         <input type="hidden" name="value" value="{{friend.name}}">
-                        <button type="submit" name="button" value="acceptFriend" style="float: right; margin-left: 5px;">
-                            Accept
-                        </button>
-                        <button type="submit" name="button" value="declineFriend" style="float: right;">
+                        <button type="submit" name="button" value="declineFriend" style="float: right; margin-left: 5px;">
                             Decline
+                        </button>
+                        <button type="submit" name="button" value="acceptFriend" style="float: right;">
+                            Accept
                         </button>
                     </form> 
                     {%endif%}
