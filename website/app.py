@@ -159,6 +159,7 @@ class Submission():
 
     def upvote(self):
         self.votes += 1
+
     def downvote(self):
         self.votes -=1
     def comment(self, input):
@@ -346,7 +347,7 @@ def formGroupsFromDB(username):
             submissionInfo = posts.getPostsByChallenge(challenge[0])
             
             for submission in submissionInfo:
-                print("sub sub %s" % submission[0])
+                #print("sub sub %s" % submission[0])
                 sub = Submission(database.findUserWithID(submission[1]), inc, submission[3], submission[2], submission[0]) 
                 newGroup.tasks[len(newGroup.tasks) - 1].get("submissions").append(submission)
                 #newGroup.add_submission(sub)
@@ -711,9 +712,9 @@ def watch(curr, group, task):
             else:
                 curr -= 1
         if(button == "UP"):
-            temp_groups[group].tasks[task].get("submissions")[curr].upvote
-            #temp_submissions[curr].upvote()
-            print("Current vote counter:")
+            posts.reactToPost(groups[group].tasks[task].get("submissions")[0][0], database.findUser(session["user"]), 1)
+        if(button == "DOWN"):
+            posts.reactToPost(groups[group].tasks[task].get("submissions")[0][0], database.findUser(session["user"]), -1)
             
             return redirect(url_for('home', group = 0))
         if(button == "Log-out"):

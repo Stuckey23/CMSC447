@@ -108,6 +108,7 @@ def getReaction(post_id, reactor_id):
 
 # UPVOTE or DOWNVOTE Post
 def reactToPost(post_id, reactor_id,reaction):
+    print("I'm trying sir")
     result = 'FAILED'
     try:
         # See if there is already a reaction by the user to the post
@@ -115,7 +116,7 @@ def reactToPost(post_id, reactor_id,reaction):
         
         if curr_reaction == None:
             # Make the Database Call
-            cur.execute("INSERT INTO public.reaction(post_id, reaction ,reactor,updated_at) VALUES (%s, %s,%s, %s, %s)", \
+            cur.execute("INSERT INTO public.reaction(post_id, reaction ,reactor,updated_at) VALUES (%s, %s, %s, %s)", \
                         [post_id, reaction, reactor_id, curr_time])
             conn.commit()
 
