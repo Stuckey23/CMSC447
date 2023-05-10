@@ -7,28 +7,26 @@ body {
     margin-bottom: 350px;
 }
 
-.login 
-{
+.login {
     padding: 50px;
     text-align: center;    
 }
 
-.login-text
-{
+.login-text {
     height: 30px;
     width: 300px;
 }
 
 h1 {
-    font-family: Verdana, Geneva, sans-serif;
-    letter-spacing: 5px;
+    font-family: Lexend, sans-serif;
+    letter-spacing: 2px;
     font-size: 5em;
     color: white;
     animation: blink-text 3.5s linear infinite;
 }
    
 p {
-    font-family: Verdana, sans-serif;
+    font-family: Lexend, sans-serif;
     font-size: 1.2em;
     color: DarkSlateGray;
 }
@@ -39,6 +37,7 @@ p {
     margin-right: -3px;
 }
 
+/* Used to make the CHKD login to blink on login screen */
 @keyframes blink-text {
     0% {
         opacity: 0;
@@ -54,4 +53,11 @@ p {
 img {
     width: auto;
     height: 100px;
+}
+
+/* Removes the bullet point from flash message, and formats the font */
+ul.flash_message {
+    list-style: none;
+    font-family: Lexend, sans-serif;
+    font-size: 20px;
 }
