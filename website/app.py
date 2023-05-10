@@ -735,7 +735,7 @@ def watch(curr, group, task):
             return  render_template('watch.html', user = session["user"], filename = filename, user_input = img_name, \
                                     media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
                                         friends=friends, comments = posts.getCommentsByPost(groups[group].tasks[task].get("submissions")[0][0]), \
-                                            form = form, currGroup = getGroup(group))
+                                            form = form, currGroup = getGroup(group), task = groups[group].tasks[task])
     
 
  #/results, webpage to view the top upvoted
