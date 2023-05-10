@@ -15,7 +15,7 @@
 
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <ul class=flashes>
+                <ul class="flash_message" class=flashes style="margin-left: -45px;">
                 {% for category, message in messages %}
                 <li class="{{ category }}">{{ message }}</li>
                 {% endfor %}
@@ -32,5 +32,6 @@
             </form>
             </h2>
         </div>
+    </div>
 </body>
 </html>

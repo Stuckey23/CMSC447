@@ -10,13 +10,12 @@
             {% include "partials/sidebar.html" %}
         </div>
         <div style="flex-grow: 1;" class="column right;">
-            <h1 style="text-align:center">Viewing Submissions</h1>
+            <h1 style="text-align:center">{{task.title}}</h1>
             <h2 style="text-align:center"> {{filename}} </h2style>
             <div>by: {{user}}</div>
             <div style="text-align: center">
                 {% if media == 1: %}
-                    <img width="100" height = "100">
-                    <img src="{{url_for('static', filename=user_input)}}">
+                    <img class="scale_pic" src="{{url_for('static', filename=user_input)}}">
                 {% elif media == 2: %}
                     <video width="320" height="240" controls>
                         <source src="{{url_for('static', filename=user_input)}}">
@@ -36,8 +35,11 @@
                 {%if curr != files:%} 
                     <button type="submit" name="submit_button" value="NEXT">NEXT</button>
                 {% endif %}
-                <h4> UPVOTE:
+                <h4>
                     <button type="submit" name="submit_button" value="UP">UPVOTE</button>        
+                <h4>
+                <h4> 
+                    <button type="submit" name="submit_button" value="DOWN">DOWNVOTE</button>        
                 <h4>
             </form>
 
@@ -45,21 +47,24 @@
             
             <form method="POST" action="#">
                 {{ form.csrf_token }}
-                <div>Comments</div>
-                {{ form.comment(size=10, placeholder = "add comment", rows = 10, cols = 100, style="resize:none") }}
-                <div></div>
+                <div style="font-size: 20px;">Comments</div>
+                {{ form.comment(size=10, placeholder = " Add comment", rows = 10, cols = 100, style="resize:none; border: transparent; border-radius: 10px;") }}
+
                 <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
                 {% for comment in comments: %}
                 <div class="row">
                         <div class="col-lg-4 "></div>
-                        <div class="col-lg-8 ">
-                        <div>
-                            <div style="height:fit-content; background-color:#d9d9d9; border: 5px solid #262626; border-radius: 10px;" class="column right">
-                            <P>{{user}}:</P>
-                            <p>{{comment}}</p>
-                        </div>
+                        <div class="col-lg-8 "></div>
+                        <div style="max-width: 780px; background-color: white; border-radius: 10px; margin-top: 5px; margin-bottom: 10px;">
+                            <hr>
+                            <div style="background-color: #f2f3f5;">
+                                <p style="color: #495c86;">{{comment[1]}}:</p>
+                                <p class="format_comment" style="color: #2b2b2c;">{{comment[2]}}</p>
+                            </div>
+                            <hr>
                 {%endfor%}    
-            </div>
+                        </div>
+                </div>
             </h6>  
             </div>          
 

@@ -18,9 +18,13 @@
                 <div>QUEST</div>
                 {{ form.quest(size=10, placeholder = "type quest name here", rows = 10, cols = 50, style="resize:none") }}
                 <div>RULES</div>
-                {{ form.rules(size=300, placeholder = "write your rules here", rows = 10, cols = 50, style="resize:none", value = "fuck it") }} 
+                {{ form.rules(size=300, placeholder = "write your rules here", rows = 10, cols = 50, style="resize:none") }} 
                 <div></div>
-                <input type="submit" name="submit_button" value="Create">
+                <form action="#" method="post">
+                    <input type="hidden" name="formType" value="newQuest">
+                    <input type="hidden" name="group" value="{{currGroup.id}}">
+                    <button type="submit" name="button" value="newQuest">Create</button>
+                </form>
             </form>
             </h2>
         </div>

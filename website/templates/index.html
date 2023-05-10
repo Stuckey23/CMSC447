@@ -28,7 +28,7 @@
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                    <ul class=flashes>
+                    <ul class="flash_message">
                     {% for category, message in messages %}
                     <li class="{{ category }}">{{ message }}</li>
                     {% endfor %}
@@ -45,8 +45,9 @@
                     </div>
                     <div class="container" style="display: flex; text-align: center;">
                         <div style="flex-grow: 1;">
-                                
-                                
+                            <form action="#" method="post">
+                                <input type="hidden" name="formType" value="home">
+                                <input type="hidden" name="group" value="{{currGroup.id}}">
                                 <input type="hidden" name="task" value="{{task.id}}">
                                 <button type="submit" name="button" value="newSubmission">Create New Submission</button>
                                 <button type="submit" name="button" value="viewSubmission">View Submissions</button>
