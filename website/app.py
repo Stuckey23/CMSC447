@@ -144,13 +144,14 @@ class Groups():
     
 
 class Submission():
-    def __init__(self, user, task, file, votes):
+    def __init__(self, user, task, file, votes, id):
         self.user = user
         self.task = task
         self.file = file
         self.filename = ""
         self.votes = votes
         self.comments = []
+        self.id = id
     def setname(self, name):
         self.filename = name
     def getname(self):
@@ -345,8 +346,8 @@ def formGroupsFromDB(username):
             submissionInfo = posts.getPostsByChallenge(challenge[0])
             
             for submission in submissionInfo:
-                #print("sub sub %s" % submission)
-                sub = Submission(database.findUserWithID(submission[1]), inc, submission[3], submission[2]) 
+                print("sub sub %s" % submission[0])
+                sub = Submission(database.findUserWithID(submission[1]), inc, submission[3], submission[2], submission[0]) 
                 newGroup.tasks[len(newGroup.tasks) - 1].get("submissions").append(submission)
                 #newGroup.add_submission(sub)
             inc += 1
@@ -386,14 +387,6 @@ def formFriendsFromDB(username):
         })
     
     return friends
-
-def formSubmissionsFromDB(challenge):
-    challengeInfo = database.getPostsByChallenge(challenge)
-    challenges.clear()
-    for challenge in challengeInfo:
-        newChallenge = Submission(database.findUserWithID(challenge[1]), challenge, challenge[3], challenge[2])
-        challenges.append(newChallenge)
-    return challenges
 
 #creates the website on localhost:5000
 @app.route('/', methods=['GET',"POST"])
@@ -558,7 +551,7 @@ def addFriend():
         # temp_groups.append(group)
         # print("%s created group: %s" % (username, groupName))
         
-    return render_template("newFriend.html", form = form, groups=groups, friends=friends, currGroup = None)
+    return render_template("newFriend.html", form = form, groups=groups, friends=friends, currGroup = None, user = session["user"])
 
 
 #/create, collects text information to create a task
@@ -608,7 +601,7 @@ def create(group):
         
         #return redirect(url_for('upload', group = temp_group.id))
         return redirect(url_for('home', group = group))
-    return render_template("create.html", form = form, groups=groups, friends=friends, currGroup = getGroup(group))
+    return render_template("create.html", form = form, groups=groups, friends=friends, currGroup = getGroup(group), user = session["user"])
 
 #/upload/<group> uploads files from the websever to the database, given the group number
 #returns redirect to watch page to veiw the submissions
@@ -648,7 +641,7 @@ def upload(group, task):
         if form.validate_on_submit():
             file = form.file.data # First grab the file
             dbChallengeID = database.findChallenge(quest_msg)
-            sub = Submission(session["user"] , task, file, 0)
+            sub = Submission(session["user"] , task, file, 0, None)
             #len(self.tasks[submission.task].get("submissions"))
             
             #update the fake databse
@@ -667,7 +660,7 @@ def upload(group, task):
         database.newPost(user, submissionFile, challenge_id)
 
         return redirect(url_for('watch', curr = 0, group = group, task = task))
-    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends, currGroup = getGroup(group))
+    return render_template('upload.html', form=form, quest = quest_msg, rules =rules_msg, groups=groups, friends=friends, currGroup = getGroup(group), user = session["user"])
            
 
 #/watch/<curr> creates webpage to veiw the actual submissions, curr is the submission
@@ -727,17 +720,20 @@ def watch(curr, group, task):
             session.clear()
             return redirect(url_for('login')) 
         if(button == "SUBMIT"):
-                print(form.comment.data)
-                temp_groups[group].tasks[task].get("submissions")[curr].commnet(form.comment.data)
+                #print(form.comment.data)
+                #print("id %s" % groups[group].tasks[task].get("submissions")[0][0])
+                #
+                #groups[group].tasks[task].get("submissions")[curr].commment(form.comment.data)
+                database.addComment(groups[group].tasks[task].get("submissions")[0][0], session["user"], form.comment.data)
                 #temp_submissions[curr].commnet(form.comment.data)
 
         #load next media file
         return redirect(url_for('watch', curr=curr, group = group, task = task))
     # Load the webpage
     else:
-            return  render_template('watch.html', user = database.findUserWithID(user), filename = filename, user_input = img_name, \
+            return  render_template('watch.html', user = session["user"], filename = filename, user_input = img_name, \
                                     media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
-                                        friends=friends, comments = [], \
+                                        friends=friends, comments = posts.getCommentsByPost(groups[group].tasks[task].get("submissions")[0][0]), \
                                             form = form, currGroup = getGroup(group))
     
 

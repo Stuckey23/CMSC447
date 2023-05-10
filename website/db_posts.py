@@ -241,11 +241,17 @@ def getCommentsByPost(post_id):
             comments = cur.fetchall()
             conn.commit()
 
+            newComments = []
+            for comment in comments:
+                comment = list(comment)
+                comment[1] = db.findUserWithID(comment[1])
+                newComments.append(comment)
 
-            if(comments == None):
-                return [] 
+            
+                
 
-            return comments
+
+            return newComments
             #   Returns 2d array where each row contains
             #   comment_id = row[0]
             #   commenter = row[1]
