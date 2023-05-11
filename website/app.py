@@ -687,19 +687,22 @@ def watch(curr, group, task):
     task = int(task)
     form = CommentForm()
     curr = int(curr)
-    points = 0
+    #print("curr entering: %s" % curr)
+    #points = 0
     #this is the original unmodifed file name
 
     groups = formGroupsFromDB(session["user"])
     friends = formFriendsFromDB(session["user"])
     filename = groups[group].tasks[task].get("submissions")[curr][3]
+    #print("heresssz %s %s %s %s %s" % (group, task, curr, filename, groups[group].tasks[task].get("submissions")[curr]))
     #print("ddd %s" % groups[group].tasks[task].get("submissions")[curr][3])
 
    
-    user = groups[group].tasks[task].get("submissions")[curr][1]
+    author = database.findUserWithID(groups[group].tasks[task].get("submissions")[curr][1])
     folder_len = len(groups[group].tasks[task].get("submissions")) -1
     #secure_name = groups[group].tasks[task].get("submissions")[curr][3]
     img_name = 'media/' + str(group) + '/' + str(task) + '/' + filename
+    #print("img name %s" % img_name)
 
     challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
     unsorted = posts.getPostsByChallenge(challenge)
@@ -716,24 +719,25 @@ def watch(curr, group, task):
         return results
     
     formType = request.form.get('formType')
-    if request.method == "POST" and formType != "sidebar":
-        button = request.form["submit_button"]
+    if request.method == "POST" and formType == "watch":
+        button = request.form["button"]
+        print("request %s" % button)
         if(button == "NEXT"):
             if curr == folder_len:
                 print(folder_len)
             else:
                 curr += 1
-        if(button == "PREV"):
+        elif(button == "PREV"):
             if curr == 0:
                 print("No previous files")
             else:
                 curr -= 1
-        if(button == "UP"):
-            points = int(unsorted[curr][2]) + 1
-            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), points)
-        if(button == "DOWN"):
-            points = int(unsorted[curr][2]) - 1
-            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), points)
+        elif(button == "UP"):
+            #points = int(unsorted[curr][2]) + 1
+            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), 1)
+        elif(button == "DOWN"):
+            #points = int(unsorted[curr][2]) - 1
+            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), -1)
 
         if(button == "Log-out"):
             session.clear()
@@ -747,13 +751,15 @@ def watch(curr, group, task):
                 #temp_submissions[curr].commnet(form.comment.data)
 
         #load next media file
-        return redirect(url_for('watch', curr=curr, group = group, task = task))
+        #print("curr leaving: %s" % curr)
+        return redirect(url_for('watch', curr = curr, group = group, task = task))
     # Load the webpage
     else:
+            #print("curr leaving b: %s" % curr)
             return  render_template('watch.html', user = session["user"], filename = filename, user_input = img_name, \
                                     media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
                                         friends=friends, comments = posts.getCommentsByPost(groups[group].tasks[task].get("submissions")[0][0]), \
-                                            form = form, currGroup = getGroup(group), task = groups[group].tasks[task])
+                                            form = form, currGroup = getGroup(group), task = groups[group].tasks[task], author = author)
     
 
  #/results, webpage to view the top upvoted
@@ -762,7 +768,6 @@ def watch(curr, group, task):
 def results(group, task):
     group = int(group)
     task = int(task)
-    print("running")
     if "user" in session:
         challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
         unsorted = posts.getPostsByChallenge(challenge)
