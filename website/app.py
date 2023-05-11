@@ -215,14 +215,14 @@ def newSubmission(group, task):
 def viewSubmission(group, task):
     
     if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
-        flash("No Submissions have been uploaded to that task yet", category="center")
+        flash("No Submissions have been uploaded to that task yet", category="center default")
         return
     return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
 
 def viewResults(group, task):
     
     if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
-        flash("No Submissions have be uploaded to that task yet")
+        flash("No Submissions have be uploaded to that task yet", category="center")
         return
     return redirect(url_for('results', group = int(group), task = int(task)))
 
