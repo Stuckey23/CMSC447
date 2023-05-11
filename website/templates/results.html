@@ -28,13 +28,12 @@
                     <h1>Unsupported format</h1>
                 {% endif %}
                 
-
-                <h3>Go Home</h3>
-                    <form method="post" action="#">
-                        <h4> 
-                            <input type="submit" name="submit_button" value="Home">       
-                        <h4>
-                    </form>   
+                <form method="post" action="#">
+                    <h4> 
+                        <input type="hidden" name="submit_button" value="Home">
+                        <button type="submit" name="button" value="Home">Go Back</button>       
+                    <h4>
+                </form>    
         </div>
     </body>
 </html>
