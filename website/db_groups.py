@@ -38,6 +38,12 @@ def newGroup(user_id, group_name):
 
     return result
 
+def addUserToDefaultGroup(user_id):  
+    relation = 'MEMBER' 
+    group_id = 40
+    # Call Database
+    cur.execute("INSERT INTO public.user_list(group_id,user_id,group_relation) VALUES (%s, %s,%s)",[group_id,user_id, relation])
+    conn.commit()
 
 # Request Member to Join Group
 def requestUserToGroup(user_id, group_id,relationship):
