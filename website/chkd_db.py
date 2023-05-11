@@ -42,6 +42,7 @@ def newChallenge(user, group, title, description):
 
 # Submit File
 def newPost(user, file, challenge_id):
+    print("new post doing")
     # Gets the user ID
     userId = findUser(user)
     file = str(file)
@@ -50,6 +51,7 @@ def newPost(user, file, challenge_id):
         # Make the Database Call
         cur.execute("INSERT INTO public.post(author,challenge_id,submission,created_at,updated_at) VALUES (%s, %s,%s, %s, %s);",[userId, challenge_id, file, curr_time,curr_time])
         conn.commit()    
+        print("success post")
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -363,6 +365,25 @@ def findGroup(groupName):
         print("The group search failed. Try again")
         conn.rollback() 
 
+def findChallenge(challengeName):
+    try:
+        cur.execute( "SELECT challenge_id FROM public.challenge WHERE title = %s", [challengeName] )
+        challengeId = cur.fetchone()
+        conn.commit()
+
+        # checks if group exists --> (group_id)
+        if(challengeId):
+            challengeId = challengeId[0]
+            return challengeId
+        
+        else:
+            return -1
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        print("The group search failed. Try again")
+        conn.rollback() 
+
 # Look for user via username
 def findUser(username):
     try:
@@ -402,6 +423,8 @@ def findUserWithID(userID):
         print(error)
         print("The userID search failed. Try again")
         conn.rollback() 
+
+        
 
 # Get List of Friends
 def getFriends(username):
