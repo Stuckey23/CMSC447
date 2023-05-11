@@ -78,7 +78,7 @@
                 {{ form.comment(size=10, placeholder = " Add comment", rows = 10, cols = 100, style="resize:none; border: transparent; border-radius: 10px;") }}
                 <br>
                 <input type="hidden" name="formType" value="watch">
-                <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
+                <button type="submit" name="button" value="SUBMIT">SUBMIT</button>
 
                 {% for comment in comments: %}
                 <div>
@@ -98,7 +98,7 @@
                 {%endfor%}    
                         </div>
                 </div>
-            </form>
+            
             </h6>  
             </div>          
 </body>
