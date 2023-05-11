@@ -65,9 +65,10 @@ def getChallengesByGroup(group_name):
     challenges = []
 
     try:
-        cur.execute("SELECT c.challenge_id, c.title, c.description \
-                    from public.challenge c  \
-                    WHERE p.group_id = %s" , [group_id])
+        print("gid %s" % group_id)
+        cur.execute("SELECT challenge_id, title, description \
+                    from public.challenge  \
+                    WHERE group_id = %s" , [group_id])
         quests = cur.fetchall()
         conn.commit()
 
@@ -107,6 +108,7 @@ def getReaction(post_id, reactor_id):
 
 # UPVOTE or DOWNVOTE Post
 def reactToPost(post_id, reactor_id,reaction):
+    print("I'm trying sir")
     result = 'FAILED'
     try:
         # See if there is already a reaction by the user to the post
@@ -114,7 +116,7 @@ def reactToPost(post_id, reactor_id,reaction):
         
         if curr_reaction == None:
             # Make the Database Call
-            cur.execute("INSERT INTO public.reaction(post_id, reaction ,reactor,updated_at) VALUES (%s, %s,%s, %s, %s)", \
+            cur.execute("INSERT INTO public.reaction(post_id, reaction ,reactor,updated_at) VALUES (%s, %s, %s, %s)", \
                         [post_id, reaction, reactor_id, curr_time])
             conn.commit()
 
@@ -240,11 +242,17 @@ def getCommentsByPost(post_id):
             comments = cur.fetchall()
             conn.commit()
 
+            newComments = []
+            for comment in comments:
+                comment = list(comment)
+                comment[1] = db.findUserWithID(comment[1])
+                newComments.append(comment)
 
-            if(comments == None):
-                return [] 
+            
+                
 
-            return comments
+
+            return newComments
             #   Returns 2d array where each row contains
             #   comment_id = row[0]
             #   commenter = row[1]
