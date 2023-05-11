@@ -18,12 +18,15 @@ def finished():
 
 # Fill in the blanks if you want to create more users
 def newUser():
-    full_name = " "
-    username = " "
+    full_name = ""
+    username = ""
     password = "abc123"
     # Make the Database Call
     cur.execute("INSERT INTO public.user(full_name,username,password, created_at,updated_at) VALUES (%s, %s,%s, %s, %s)",[full_name, username, password, curr_time,curr_time])
     conn.commit()
+
+    user_id = findUser(username)
+    groups.addUserToDefaultGroup(user_id)
 
 # Submit Challenge
 def newChallenge(user, group, title, description):

@@ -11,12 +11,13 @@
         </div>
         <div style="flex-grow: 1;" class="column right;">
             <h1 style="text-align:center">{{task.title}}</h1>
+
             <h2 style="text-align:center"></h2style>
             
             <div class="comment_style img_container" style="background-color: white; text-align: left;">
                 <img class="profile" src="/static/icons/default_profile.jpg">
                 <p style="color: #495c86; margin-left: 10px;">
-                    {{user}}
+                    {{author}}
                     <br>
                     <span class="format_comment" style="margin-left: -1px;">{{filename}}</span>
                     <br>
@@ -40,19 +41,29 @@
                 {% endif %}
             </div>
 
-            <form method="post" action="#">
+
+                <!-- <form action="#" method="post">
+                    <input type="hidden" name="formType" value="watch">
+                    <button type="submit" name="button" value="newQuest">Create</button>
+                </form> -->
+
+            <form method="POST" action="#">
                 {%if curr != 0:%}
-                    <button type="submit" name="submit_button" value="PREV">PREV</button>
+                    <input type="hidden" name="formType" value="watch">
+                    <button type="submit" name="button" value="PREV">PREV</button>
                 {% endif %}
                 {%if curr != files:%} 
-                    <button type="submit" name="submit_button" value="NEXT">NEXT</button>
+                    <input type="hidden" name="formType" value="watch">
+                    <button type="submit" name="button" value="NEXT">NEXT</button>
                 {% endif %}
                 <br>
                 <h4 class="same_line">
-                    <button class="spin" type="submit" name="submit_button" value="UP" style="margin-right: 10px;">
+                    <input type="hidden" name="formType" value="watch">
+                    <button class="spin" type="submit" name="button" value="UP" style="margin-right: 10px;">
                         <img class="icon" src="/static/icons/upvote.png">
-                    </button>         
-                    <button class="spin" type="submit" name="submit_button" value="DOWN">
+                    </button> 
+                    <input type="hidden" name="formType" value="watch">
+                    <button class="spin" type="submit" name="button" value="DOWN">
                         <img class="icon" src="/static/icons/downvote.png">
                     </button>        
                 </h4>
@@ -62,13 +73,17 @@
             <h6>  
             <form method="POST" action="#">
                 {{ form.csrf_token }}
+
                 <div style="font-size: 20px;">Comments</div>
                 {{ form.comment(size=10, placeholder = " Add comment", rows = 10, cols = 100, style="resize:none; border: transparent; border-radius: 10px;") }}
                 <br>
+                <input type="hidden" name="formType" value="watch">
                 <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
+
                 {% for comment in comments: %}
                 <div>
                         <div class="col-lg-4 "></div>
+
                         <div class="col-lg-8 "></div>
                         <div style="height: fit-content; max-width: 900px;">
                             <div class="comment_style img_container" style="background-color: white; text-align: left;">
@@ -83,6 +98,7 @@
                 {%endfor%}    
                         </div>
                 </div>
+            </form>
             </h6>  
             </div>          
 </body>

@@ -55,29 +55,7 @@
                             </form> 
                         </div>
                     </div>
-                    {% for submission in task.submissions %}
-
-                        {{submission.filename}}
-                        <div class="container" style="display: flex;">
-                            <div style="flex-grow: 1;">
-                            {% if submission.mediaType == 1: %}
-                            
-                                <img src="{{url_for('static', filename=submission.filename)}}" width="320" height="240">
-                            
-                            {% elif submission.mediaType == 2: %}
-                                <video width="320" height="240" controls>
-                                    <source src="{{url_for('static', filename=submission.filename)}}">
-                                </video>
-                            {% elif submission.mediaType == 3: %}
-                                <audio controls>
-                                    <source src="{{url_for('static', filename=submission.filename)}}">
-                                </audio>
-                            {% else: %}
-                                <h1>Unsupported format</h1>
-                            {% endif %}
-                        </div>
-                        </div>
-                    {% endfor %}
+                   
             {% endfor %}
         </div>
     </div> 

@@ -50,11 +50,12 @@ app.config['MEDIA_FOLDER'] = 'static\media'
 app.config['OLD_FOLDER'] = 'static\old'
 
 #clear out the media file
+"""""
 if(os.path.exists(os.path.join(root_path, app.config['MEDIA_FOLDER']))):
     os.rename(os.path.join(root_path, app.config['MEDIA_FOLDER']), os.path.join(root_path, app.config['OLD_FOLDER']))
     shutil.rmtree(os.path.join(root_path, app.config['OLD_FOLDER']))
 os.mkdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))
-
+"""
 # 10 mb content length
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
@@ -197,7 +198,7 @@ def handleHome(request):
         "newSubmission": newSubmission,
         "viewSubmission": viewSubmission,
         "newQuest": createQuest,
-        #"viewResults": viewResults #currently not implemented
+        "viewResults": viewResults #currently not implemented
     }
 
     if request.method == "POST":
@@ -218,6 +219,14 @@ def viewSubmission(group, task):
         return
     return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
 
+def viewResults(group, task):
+    
+    if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
+        flash("No Submissions have be uploaded to that task yet")
+        return
+    return redirect(url_for('results', group = int(group), task = int(task),))
+
+
 def createQuest(group, task):
     
     
@@ -236,7 +245,8 @@ def handleSidebar(request):
         "deleteGroup": deleteGroup,
         "log-out": logOut,
         "groupSelect": groupSelect,
-        "inviteFriend": inviteFriend
+        "inviteFriend": inviteFriend,
+        "home": goHome 
         }
     
     if request.method == "POST":
@@ -324,7 +334,12 @@ def getGroup(id):
 def validateUser():
     if "user" in session:
         return None
-    else: return redirect(url_for('login'))    
+    else: return redirect(url_for('login')) 
+
+def goHome(group):
+    print(group)
+    return redirect(url_for('home', group = 0))
+      
 
 def formGroupsFromDB(username):
     groupNames = database.getGroupNamesOfUser(username)
@@ -672,19 +687,26 @@ def watch(curr, group, task):
     task = int(task)
     form = CommentForm()
     curr = int(curr)
+    #print("curr entering: %s" % curr)
+    #points = 0
     #this is the original unmodifed file name
 
     groups = formGroupsFromDB(session["user"])
     friends = formFriendsFromDB(session["user"])
-    filename = groups[group].tasks[task].get("submissions")[curr][3]
+    challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
+    unsorted = posts.getPostsByChallenge(challenge)
+    unsorted.sort(key = lambda x: x[0])
+    filename = str(unsorted[curr][3])
+    #print("heresssz %s %s %s %s %s" % (group, task, curr, filename, groups[group].tasks[task].get("submissions")[curr]))
     #print("ddd %s" % groups[group].tasks[task].get("submissions")[curr][3])
 
+
    
-    user = groups[group].tasks[task].get("submissions")[curr][1]
+    author = database.findUserWithID(unsorted[curr][1])
     folder_len = len(groups[group].tasks[task].get("submissions")) -1
     #secure_name = groups[group].tasks[task].get("submissions")[curr][3]
     img_name = 'media/' + str(group) + '/' + str(task) + '/' + filename
-
+    #print("img name %s" % img_name)
 
     #print(img_name)
     #check what button is pressed
@@ -699,24 +721,27 @@ def watch(curr, group, task):
         return results
     
     formType = request.form.get('formType')
-    if request.method == "POST" and formType != "sidebar":
-        button = request.form["submit_button"]
+    if request.method == "POST" and formType == "watch":
+        button = request.form["button"]
+        print("request %s" % button)
         if(button == "NEXT"):
             if curr == folder_len:
                 print(folder_len)
             else:
                 curr += 1
-        if(button == "PREV"):
+        elif(button == "PREV"):
             if curr == 0:
                 print("No previous files")
             else:
                 curr -= 1
-        if(button == "UP"):
-            posts.reactToPost(groups[group].tasks[task].get("submissions")[0][0], database.findUser(session["user"]), 1)
-        if(button == "DOWN"):
-            posts.reactToPost(groups[group].tasks[task].get("submissions")[0][0], database.findUser(session["user"]), -1)
-            
-            return redirect(url_for('home', group = 0))
+
+        elif(button == "UP"):
+            #points = int(unsorted[curr][2]) + 1
+            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), 1)
+        elif(button == "DOWN"):
+            #points = int(unsorted[curr][2]) - 1
+            posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), -1)
+
         if(button == "Log-out"):
             session.clear()
             return redirect(url_for('login')) 
@@ -729,47 +754,47 @@ def watch(curr, group, task):
                 #temp_submissions[curr].commnet(form.comment.data)
 
         #load next media file
-        return redirect(url_for('watch', curr=curr, group = group, task = task))
+        #print("curr leaving: %s" % curr)
+        return redirect(url_for('watch', curr = curr, group = group, task = task))
     # Load the webpage
     else:
+            #print("curr leaving b: %s" % curr)
             return  render_template('watch.html', user = session["user"], filename = filename, user_input = img_name, \
                                     media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
                                         friends=friends, comments = posts.getCommentsByPost(groups[group].tasks[task].get("submissions")[0][0]), \
-                                            form = form, currGroup = getGroup(group), task = groups[group].tasks[task])
+                                            form = form, currGroup = getGroup(group), task = groups[group].tasks[task], author = author)
+
     
 
  #/results, webpage to view the top upvoted
  #this is not fully coded yet
 @app.route('/results/<group>/<task>', methods=['GET', 'POST'])
 def results(group, task):
-    pass
-    # group = int(group)
-    # task = int(task)
-    # if "user" in session:
-    #     unsorted = []
-    #     winner_index = 0
-    #     #This is a really bad way to get the top voted
-    #     folder_len = len(os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER'])))
-    #     print("This is the current "+ str(folder_len))
-    #     for votes in range(folder_len):
-    #         unsorted.append((temp_submissions[votes].votes))
-    #     num_votes  = max(unsorted)
+    group = int(group)
+    task = int(task)
+    if "user" in session:
+        challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
+        unsorted = posts.getPostsByChallenge(challenge)
+        #sort challeng post and find the most poinst post
+        winner = unsorted[0]
+        maximum_val= posts.getPoints(unsorted[0][0])
+        for i in range(1, len(unsorted)): 
+            if (posts.getPoints(unsorted[i][0]) > maximum_val):
+                maximum_val = posts.getPoints(unsorted[i][0])
+                winner = unsorted[i]
+        print(winner)
+        user_name = database.findUserWithID(winner[1])
+        file_name = winner[3][1:] #slice off the file index number for the looks
+        secure_name = winner[3]
+        img_name = 'media/' + str(group) + '/' + str(task) + '/' + str(secure_name)
+    
+        if request.method == "POST":
+            return redirect(url_for('home', group = 0))
 
-    #     for votes in range(folder_len):
-    #         if temp_submissions[votes].votes == num_votes:
-    #             winner_index = votes
+    else: return redirect(url_for('login'))
 
-    #     user_name = temp_submissions[winner_index].user
-    #     file_name = temp_submissions[winner_index].file
-    #     img_name = 'media/' + os.listdir(os.path.join(root_path, app.config['MEDIA_FOLDER']))[winner_index]
-    #     print(img_name)
-    #     print(winner_index)
-    #     if request.method == "POST":
-    #         return redirect(url_for('home', group = 0))
-
-    # else: return redirect(url_for('login'))
-    # return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = num_votes, groups=temp_groups, friends=friends)       
-
+    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = maximum_val, groups=groups, friends=friends, currGroup = getGroup(group))       
+    
 if __name__ == '__main__':
     #Uncomment if you want everyone on your local network to connect!
     #This will work on eduroam or umbc vistor for a class demostration 
@@ -779,4 +804,5 @@ if __name__ == '__main__':
     app.run(debug=True, host = "0.0.0.0", port = 25565)
     '''
     app.run(debug=True)
+    #threaded = False
     #database.finished()
