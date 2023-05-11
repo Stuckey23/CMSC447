@@ -185,7 +185,7 @@ def mediaType(img_name):
         media_type = 0 # unsupported media format
     return media_type
 
-#FAKE DATABSE!
+#FAKE DATABASE!
 #This is here beacause I havent connected the website to the data base yet
 temp_groups = []    #temp list of all groups  
 temp_group = Groups("none", 0)#temp group fo testing
@@ -215,7 +215,7 @@ def newSubmission(group, task):
 def viewSubmission(group, task):
     
     if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
-        flash("No Submissions have be uploaded to that task yet")
+        flash("No Submissions have been uploaded to that task yet", category="center")
         return
     return redirect(url_for('watch', curr =0, group = int(group), task = int(task),))
 
@@ -421,7 +421,7 @@ def login():
 
         # User login failed
         if(user_id == -1):
-            flash("The username or password you’ve entered is incorrect. Try again")
+            flash("The username or password you’ve entered is incorrect. Try again!")
             print("Fail")
         
         # User login success!
@@ -505,7 +505,7 @@ def groupCreation():
         
         # Group name taken
         else:
-            flash(result)
+            flash(result, category="default")
             # Need to return to previous page but flash the message somehow.
         
     return render_template("newGroup.html", form = form, user = user, groups=groups, friends=friends, currGroup = None)
@@ -537,7 +537,7 @@ def addFriend():
 
         # Check if trying to add self
         if friendName == username:
-            flash("Hey! You cannot add your self!")
+            flash("Hey! You cannot add yourself!")
 
         # Check if user exists
         else:
@@ -547,12 +547,12 @@ def addFriend():
             # User does not exist
             if friendID == -1:
                 print("not found")
-                flash("That user doesn't exist! :()")
+                flash("That user doesn't exist! :(")
         
             # Send the request
             else:
                 result = database.requestFriend(username, friendName)
-                flash(result)
+                flash(result, category="default")
                 return redirect(url_for('home', group = 0))
             
         
@@ -700,6 +700,7 @@ def watch(curr, group, task):
     #print("heresssz %s %s %s %s %s" % (group, task, curr, filename, groups[group].tasks[task].get("submissions")[curr]))
     #print("ddd %s" % groups[group].tasks[task].get("submissions")[curr][3])
 
+
    
     author = database.findUserWithID(unsorted[curr][1])
     folder_len = len(groups[group].tasks[task].get("submissions")) -1
@@ -733,6 +734,7 @@ def watch(curr, group, task):
                 print("No previous files")
             else:
                 curr -= 1
+
         elif(button == "UP"):
             #points = int(unsorted[curr][2]) + 1
             posts.reactToPost(unsorted[curr][0], database.findUser(session["user"]), 1)
@@ -761,6 +763,7 @@ def watch(curr, group, task):
                                     media = mediaType(img_name), curr = curr, files = folder_len, groups=groups, \
                                         friends=friends, comments = posts.getCommentsByPost(groups[group].tasks[task].get("submissions")[0][0]), \
                                             form = form, currGroup = getGroup(group), task = groups[group].tasks[task], author = author)
+
     
 
  #/results, webpage to view the top upvoted

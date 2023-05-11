@@ -11,14 +11,25 @@
         </div>
         <div style="flex-grow: 1;" class="column right;">
             <h1 style="text-align:center">{{task.title}}</h1>
-            <h2 style="text-align:center"> {{filename}} </h2style>
-                <div>by: {{author}}</div>
-            <div style="text-align: center">
+
+            <h2 style="text-align:center"></h2style>
+            
+            <div class="comment_style img_container" style="background-color: white; text-align: left;">
+                <img class="profile" src="/static/icons/default_profile.jpg">
+                <p style="color: #495c86; margin-left: 10px;">
+                    {{author}}
+                    <br>
+                    <span class="format_comment" style="margin-left: -1px;">{{filename}}</span>
+                    <br>
+                </p>
+            </div>
+        
+    
+            <div style="text-align: center;">
                 {% if media == 1: %}
-                    
-                    <img src="{{url_for('static', filename=user_input)}}">
+                    <img class="scale_pic" src="{{url_for('static', filename=user_input)}}">
                 {% elif media == 2: %}
-                    <video width="320" height="240" controls>
+                    <video width="420" height="340" controls>
                         <source src="{{url_for('static', filename=user_input)}}">
                     </video>
                 {% elif media == 3: %}
@@ -28,6 +39,7 @@
                 {% else: %}
                     <h1>Unsupported format</h1>
                 {% endif %}
+            </div>
 
 
                 <!-- <form action="#" method="post">
@@ -44,40 +56,50 @@
                     <input type="hidden" name="formType" value="watch">
                     <button type="submit" name="button" value="NEXT">NEXT</button>
                 {% endif %}
-                <h4>
+                <br>
+                <h4 class="same_line">
                     <input type="hidden" name="formType" value="watch">
-                    <button type="submit" name="button" value="UP">UPVOTE</button>        
-    
-                <h4> 
+                    <button class="spin" type="submit" name="button" value="UP" style="margin-right: 10px;">
+                        <img class="icon" src="/static/icons/upvote.png">
+                    </button> 
                     <input type="hidden" name="formType" value="watch">
-                    <button type="submit" name="button" value="DOWN">DOWNVOTE</button>        
-                <h4>
-            </form>
-
-            <h6>  
+                    <button class="spin" type="submit" name="button" value="DOWN">
+                        <img class="icon" src="/static/icons/downvote.png">
+                    </button>        
+                </h4>
+            </form>            
             
+            <div>
+            <h6>  
             <form method="POST" action="#">
                 {{ form.csrf_token }}
-                <div>Comments</div>
-                {{ form.comment(size=10, placeholder = "add comment", rows = 10, cols = 100, style="resize:none") }}
-                <div></div>
+
+                <div style="font-size: 20px;">Comments</div>
+                {{ form.comment(size=10, placeholder = " Add comment", rows = 10, cols = 100, style="resize:none; border: transparent; border-radius: 10px;") }}
+                <br>
                 <input type="hidden" name="formType" value="watch">
-                <button type="submit" name="button" value="SUBMIT">SUBMIT</button>
+                <button type="submit" name="submit_button" value="SUBMIT">SUBMIT</button>
+
                 {% for comment in comments: %}
-                <div class="row">
+                <div>
                         <div class="col-lg-4 "></div>
-                        <div class="col-lg-8 ">
-                        <div>
-                            <div style="height:fit-content; background-color:#d9d9d9; border: 5px solid #262626; border-radius: 10px;" class="column right">
-                            <P>{{comment[1]}}:</P>
-                            <p>{{comment[2]}}</p>
-                        </div>
+
+                        <div class="col-lg-8 "></div>
+                        <div style="height: fit-content; max-width: 900px;">
+                            <div class="comment_style img_container" style="background-color: white; text-align: left;">
+                                
+                                <img class="profile" src="/static/icons/default_profile.jpg">
+                                    
+                                <p><span style="color: #495c86; margin-left: 12px;">{{comment[1]}}:</span>
+                                <br>
+                                <span class="format_comment">{{comment[2]}}</span></p>
+                                    
+                            </div>
                 {%endfor%}    
-            </div>
+                        </div>
+                </div>
+            </form>
             </h6>  
             </div>          
-
-
-    
 </body>
 </html>

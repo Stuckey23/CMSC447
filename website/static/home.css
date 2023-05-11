@@ -3,15 +3,15 @@ body {
     margin-top: 25px;
     margin-left: 30px;
     margin-right: 30px;
-    margin-bottom: 100px;
+    margin-bottom: 50px;
 }
 
-h1, h2, h3, p {
-    font-family: Verdana, sans-serif;
+h1, h2, h3, p, div {
+    font-family: 'Lexend', sans-serif;
 }
 
 h1 {
-    font-size: 35px;
+    font-size: 30px;
     color: white;
 }
 
@@ -22,12 +22,13 @@ h2, h3, p {
 
 button {
     color: white;
-    font-family: Verdana, sans-serif;
+    font-family: 'Lexend', sans-serif;
     background-color: #74a8ce;
     border: 3px solid #74a8ce;
     border-radius: 10px;  
 }
 
+/* Formats button when hovered over */
 button:hover {
     color: white;
     background-color: #22578c;
@@ -36,25 +37,38 @@ button:hover {
     cursor: pointer;
 }
 
-.button {
-    background: url("/static/icons/home.png");
-}
-
-img {
+/* Used to scale icons such as the home 
+   button and checkmark logo */
+.icon {
     width: auto;
     height: 50px;
 }
 
+.same_line {
+    display: inline-block;
+}
+
+/* Used to scale picture submissions */
+.scale_pic {
+    width: auto;
+    height: 300px;
+    margin-top: 15px;
+}
+
+/* Helps to keep the format for the sidebar */
 .column {
     float: left;
     padding: 10px;
-    height: 600px;
+    height: 750px;
+    overflow-y: auto;
 }
 
+/* Helps sidebar formating */
 .left {
     width: 35%;
 }
 
+/* Helps format the main content */
 .right {
     width: 65%;
 }
@@ -66,18 +80,96 @@ img {
     margin-bottom: 20px;
 }
 
+/* Helps color formating for sidebar, misleading name */
 .opacity {
     background: rgba(3, 172, 240, 0.4);
 }
 
+/* Used in side bar to center 'CHKD' */
 .center_text {
     text-align: center;
     margin-left: -8px;
     margin-bottom: -3px;
 }
 
+/* Helps format the home button */
 .home_button {
     float: left;
     margin-left: 5px;
     margin-right: -45px;
+}
+
+/* Removes the bullet point from flahs messages and formats the font */
+ul.flash_message {
+    list-style: none;
+    font-family: 'Lexend', sans-serif;
+    font-size: 20px;
+}
+
+/* Used in app.py to format flash messages for
+   friend requests and taken group names */
+.default {
+    color: white;
+    list-style: none;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    margin-left: 67px;
+    margin-top: 40px;
+}
+
+/* Used in app.py to format flash messages
+   for trying to view submissions when
+   none are uploaded */
+.center {
+    color: white;
+    list-style: none;
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    text-align: center;
+    margin-left: -40px;
+}
+
+/* Helps format comments on watch page, stops
+   the comment from going off screen */
+.format_comment {
+    color: #2b2b2c;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+/* Styles comment boxes */
+.comment_style {
+    box-shadow: 0 0 7px 1px rgba(60, 60, 60, 0.4);
+    border-radius: 10px; 
+    margin-top: 15px; 
+    padding: 0.15%;
+    line-height: 1.4;
+}
+
+/* Style profile picture */
+.profile {
+    width: auto;
+    height: 50px;
+    border-radius: 50%;
+    margin-left: 8px;
+    margin-right: 10px;
+}
+
+/* Lets profile picture be to the side with
+   username and comment to the side */
+.img_container {
+    display: flex;
+    align-items: center;
+}
+
+.spin img {
+    transition: transform 0.5s ease-in-out;
+}
+
+.spin:hover img {
+    transform: rotate(360deg);
 }

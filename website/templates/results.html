@@ -15,7 +15,7 @@
             <h3 style="text-align:center"> VOTES: {{votes}} </h3style>
             <div style="text-align: center">
                 {% if media == 1: %}
-                    <img src="{{url_for('static', filename=user_input)}}">
+                    <img class="scale_pic" src="{{url_for('static', filename=user_input)}}">
                 {% elif media == 2: %}
                     <video width="320" height="240" controls>
                         <source src="{{url_for('static', filename=user_input)}}">
