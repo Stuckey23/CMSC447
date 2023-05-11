@@ -693,19 +693,20 @@ def watch(curr, group, task):
 
     groups = formGroupsFromDB(session["user"])
     friends = formFriendsFromDB(session["user"])
-    filename = groups[group].tasks[task].get("submissions")[curr][3]
+    challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
+    unsorted = posts.getPostsByChallenge(challenge)
+    unsorted.sort(key = lambda x: x[0])
+    filename = str(unsorted[curr][3])
     #print("heresssz %s %s %s %s %s" % (group, task, curr, filename, groups[group].tasks[task].get("submissions")[curr]))
     #print("ddd %s" % groups[group].tasks[task].get("submissions")[curr][3])
 
    
-    author = database.findUserWithID(groups[group].tasks[task].get("submissions")[curr][1])
+    author = database.findUserWithID(unsorted[curr][1])
     folder_len = len(groups[group].tasks[task].get("submissions")) -1
     #secure_name = groups[group].tasks[task].get("submissions")[curr][3]
     img_name = 'media/' + str(group) + '/' + str(task) + '/' + filename
     #print("img name %s" % img_name)
 
-    challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
-    unsorted = posts.getPostsByChallenge(challenge)
     #print(img_name)
     #check what button is pressed
     #check that the user actually sigined in and didn't manually type the url
@@ -773,10 +774,10 @@ def results(group, task):
         unsorted = posts.getPostsByChallenge(challenge)
         #sort challeng post and find the most poinst post
         winner = unsorted[0]
-        maximum_val= unsorted[0][2]
+        maximum_val= posts.getPoints(unsorted[0][0])
         for i in range(1, len(unsorted)): 
-            if (unsorted[i][2] > maximum_val):
-                maximum_val = unsorted[i][2]
+            if (posts.getPoints(unsorted[i][0]) > maximum_val):
+                maximum_val = posts.getPoints(unsorted[i][0])
                 winner = unsorted[i]
         print(winner)
         user_name = database.findUserWithID(winner[1])
