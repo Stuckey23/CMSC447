@@ -198,7 +198,7 @@ def handleHome(request):
         "newSubmission": newSubmission,
         "viewSubmission": viewSubmission,
         "newQuest": createQuest,
-        "viewResults": viewResults #currently not implemented
+        "viewResults": viewResults 
     }
 
     if request.method == "POST":
@@ -224,7 +224,7 @@ def viewResults(group, task):
     if len(groups[int(group)].tasks[int(task)].get("submissions")) == 0:
         flash("No Submissions have be uploaded to that task yet")
         return
-    return redirect(url_for('results', group = int(group), task = int(task),))
+    return redirect(url_for('results', group = int(group), task = int(task)))
 
 
 def createQuest(group, task):
@@ -770,8 +770,18 @@ def watch(curr, group, task):
  #this is not fully coded yet
 @app.route('/results/<group>/<task>', methods=['GET', 'POST'])
 def results(group, task):
+    results = validateUser()
+    if results != None:
+        return results
+    
+    # Sees if anything was pressed in sidebar, handles it
+    results = handleSidebar(request)
+    if results != None:
+        return results
     group = int(group)
     task = int(task)
+    groups = formGroupsFromDB(session["user"])
+    friends = formFriendsFromDB(session["user"])
     if "user" in session:
         challenge = posts.getChallengesByGroup(groups[group].name)[task][0] #0 is the index for challange id
         unsorted = posts.getPostsByChallenge(challenge)
@@ -788,12 +798,10 @@ def results(group, task):
         secure_name = winner[3]
         img_name = 'media/' + str(group) + '/' + str(task) + '/' + str(secure_name)
     
-        if request.method == "POST":
-            return redirect(url_for('home', group = 0))
+        
 
-    else: return redirect(url_for('login'))
-
-    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), votes = maximum_val, groups=groups, friends=friends, currGroup = getGroup(group))       
+    return  render_template('results.html', user =user_name, file = file_name, user_input = img_name, media = mediaType(img_name), \
+                            votes = maximum_val, groups=groups, friends=friends, currGroup = getGroup(group))       
     
 if __name__ == '__main__':
     #Uncomment if you want everyone on your local network to connect!
