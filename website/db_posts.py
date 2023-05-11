@@ -119,12 +119,13 @@ def reactToPost(post_id, reactor_id,reaction):
             cur.execute("INSERT INTO public.reaction(post_id, reaction ,reactor,updated_at) VALUES (%s, %s, %s, %s)", \
                         [post_id, reaction, reactor_id, curr_time])
             conn.commit()
-
+          
             # Update Points on Post
             updatePoints(post_id)
 
             # DONE
             result = 'SUCCESS'
+            print("Successfully added reaction")
 
         # User has already reacted to post
         else:
@@ -147,32 +148,45 @@ def reactToPost(post_id, reactor_id,reaction):
     # Get out...
     return result
 
+# Get Total Votes / Points by post
+def getPoints(post_id):
+        try:
+            # Get sum of reactions to post
+            cur.execute("SELECT SUM(reaction) FROM public.reaction WHERE post_id = %s", [post_id])
+            points = cur.fetchone()
+
+            if(points):
+                points = int(points[0])
+
+            else:
+                points = 0    
+
+            return points 
+        
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            print("Failed to get points on post. Try again")
+            conn.rollback()
+
+        return 0
 
 def updatePoints(post_id):
     result = 'FAILED"'
     try:
-        # Get sum of reactions to post
-        cur.execute("SELECT SUM(reaction) FROM public.reaction WHERE post_id = %s", [post_id])
-        points = cur.fetchone()
-
-        if(points):
-            points = int(points[0])
-
-        else:
-            points = 0     
+        points = getPoints(post_id)
         
         # Actually update the points on the post
         cur.execute("UPDATE public.post SET points = %s WHERE post_id = %s", [points, post_id])
         conn.commit()
 
-        # DONE
-        result = 'SUCCESS'
-
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         print("Failed to update points on post. Try again")
         conn.rollback()
-    
+
+        # DONE
+        result = 'SUCCESS'
+
     return result
 
 
