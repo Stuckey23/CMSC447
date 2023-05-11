@@ -184,7 +184,7 @@ def mediaType(img_name):
         media_type = 0 # unsupported media format
     return media_type
 
-#FAKE DATABSE!
+#FAKE DATABASE!
 #This is here beacause I havent connected the website to the data base yet
 temp_groups = []    #temp list of all groups  
 temp_group = Groups("none", 0)#temp group fo testing
@@ -522,7 +522,7 @@ def addFriend():
 
         # Check if trying to add self
         if friendName == username:
-            flash("Hey! You cannot add your self!")
+            flash("Hey! You cannot add yourself!")
 
         # Check if user exists
         else:
