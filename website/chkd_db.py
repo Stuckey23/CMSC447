@@ -9,7 +9,7 @@ from decimal import Decimal
 
 # Connect to the CHKD Database
 curr_time = datetime.datetime.now(pytz.timezone('US/Eastern'))
-conn = psycopg2.connect(database="CHKD", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5432")
+conn = psycopg2.connect(database="CHKD", user = "postgres", password = "postgres", host = "127.0.0.1", port = "5433")
 cur = conn.cursor()
 
 # When finished with db call, close DB connection
