@@ -18,7 +18,7 @@ import db_posts as posts
 
 #changed port number
 # Create Postgres Database Engine
-engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5433/CHKD')
+engine = sqlalchemy.create_engine('postgresql://postgres:postgres@localhost:5432/CHKD')
 
 video_formats = [".mp4", ".webm"] # hardcoded video formats
 image_formats = [".jpg", ".png", "jpeg", ".gif",".bmp"] # hardcoded image formats
